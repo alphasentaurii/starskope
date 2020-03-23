@@ -1,0 +1,15 @@
+.ipynb_checkpoints
+.DS_Store
+__pycache__
+*.db
+*.pytest_cache
+*.json
+*.tsv
+*.tfevents
+*.zip
+*.fits
+*.csv
+images/*
+.learn
+Icon?
+
