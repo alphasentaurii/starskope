@@ -1,0 +1,2 @@
+# starskope
+Cyberoptic Artificial Telescope
