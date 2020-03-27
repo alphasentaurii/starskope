@@ -1,3 +1,53 @@
+
+KEPLER/K2 MISSION OVERVIEW AND TECH SPECS
+
+The Kepler mission was reconstituted as the K2 mission after the failure of the 2nd of Kepler’s 4 reaction wheels in May 2013 (Howell et al., 2014; Van Cleve et al., 2016). However, since the flight system remains otherwise unchanged, with the exception of the loss of CCD module 7 between the end of Kepler and the start of K2, no further revisions of this document are planned. 
+
+-----
+
+Mission Overview
+Kepler was launched into a trailing heliocentric orbit on March 7, 2009 UT. The Kepler Mission is designed to detect transits of Earth-size planets in the “habitable zone” orbiting 9< mv<15, F through M type dwarf stars by means of differential photometry of >100,000 stars in the constellations Cygnus and Lyra. 
+
+the total amount of time over which the data in a cadence is coadded is the cadence period, which in the case of the flight default operating parameters is 1765.5 s = 0.4904 h
+
+
+The set of pixels collected by one repetition of the CCD clocking cycle is called a frame, and frame and integration time are synonymous, though the former is preferred where applicable since it is less multivalent. 
+
+Data volume is reduced by another factor of 4 or so by various data compression techniques (See §7.4). FGS CCDs are read out continuously at 10 Hz. A relatively small number of pixels (43,520), representing 512 targets, are coadded and read out of the SDAs once a minute; these, not surprisingly, are called the Short Cadence (SC) targets.
+
+Every quarter, Kepler rolls about its optical axis by 90 degrees to keep the Sun on the solar panels and the radiator, which cools the focal plane, pointed to deep space. The same area of the sky is observed for the entire mission, but a given star will wind up in four different parts of the focal plane, depending on season.
+
+Kepler planning consists of selecting targets, and assigning pixels of interest to include for each target (the “aperture”). 
+
+The Kepler Data Processing Pipeline removes instrumental signatures from the pixel data in a standard way, using a standard set of calibration data (see the Kepler Data Handbook, KDPH). 
+
+The Pipeline then generates photometry time series, which are corrected for systematic errors and then subjected to a transit search. Transit candidates are passed through a series of data validation steps to ensure that the observed variation in flux comes from the target and not background stars or instrumental effects.
+
+
+
+
+
+
+```
+photon/
+├── css/
+│   ├── photon.css
+├── fonts/
+│   ├── photon-entypo.eot
+│   ├── photon-entypo.svg
+│   ├── photon-entypo.ttf
+│   └── photon-entypo.woff
+└── template-app/
+    ├── js/
+    │   └── menu.js
+    ├── app.js
+    ├── index.html
+    └── package.json
+```
+
+
+git clone http://gitlab.com/cmaureir/gravidy-view.git
+
 http://www.stsci.edu/hst/nicmos/tools/conversion_form.html
 
 https://astroquery.readthedocs.io/en/latest/mast/mast.html#hubble-source-catalog-hsc-specific-queries
@@ -205,3 +255,9 @@ copy : bool, optional
     radial_velocity : `~astropy.units.Quantity`, optional
         The component of the velocity along the line-of-sight (i.e., the
         radial direction), in velocity units.
+
+
+
+Elliot Wave Principle 
+
+Fibonacci Retracement
