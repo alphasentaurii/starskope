@@ -9,6 +9,7 @@ __pycache__
 *.fits
 *.csv
 images/*
+*.png
 .learn
 Icon?
 
