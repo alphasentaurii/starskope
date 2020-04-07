@@ -6,7 +6,6 @@ __pycache__
 *.json
 *.tsv
 *.tfevents
-*.zip
 *.fits
 *.csv
 images/*
