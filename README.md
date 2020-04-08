@@ -18,6 +18,9 @@
     starskøpe II: Computer Vision/Restricted Boltzmann Machines for Spectographs
     starskøpe III: CV/RBMs for Fourier Transformed Spectographs
 
+![](https://github.com/hakkeray/starskope/blob/master/288_planetbleed1600.jpeg)
+*image credit: NASA*
+
 # Mission Brief
 
 ## ABSTRACT
