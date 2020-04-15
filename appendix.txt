@@ -1,0 +1,16 @@
+
+* `skimage.io <https://scikit-image.org/docs/dev/api/skimage.io.html>`_ or
+  `Imageio <https://imageio.readthedocs.io/en/latest/userapi.html>`_ 
+  for loading images and videos into numpy arrays
+  
+  
+  
+  
+      * `"A fast learning algorithm for deep belief nets"
+      <https://www.cs.toronto.edu/~hinton/absps/fastnc.pdf>`_
+      G. Hinton, S. Osindero, Y.-W. Teh, 2006
+
+    * `"Training Restricted Boltzmann Machines using Approximations to
+      the Likelihood Gradient"
+      <https://www.cs.toronto.edu/~tijmen/pcd/pcd.pdf>`_
+      T. Tieleman, 2008
