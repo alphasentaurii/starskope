@@ -119,8 +119,86 @@ class flux:
         plt.title(title_line)
         plt.show();
 
+
+
+# 
+
+### IN PROG 
+
+
+
+    # SIGNAL_SPLITS #### WORK IN PROGRESS
     @staticmethod
     def signal_splits(signal, figsize=(21,11), **subplot_kws):
 
         fig, axes = plt.subplots(ncols=3, figsize=figsize, **subplot_kws)
         axes = axes.flatten()
+
+
+# def fastFourier(signal, bins):
+    # """
+    # takes in array and rotates #bins to the left as a fourier transform
+    # returns vector of length equal to input array
+    # """
+    # import numpy as np
+    # # 
+    # arr = np.asarray(signal)
+    # fq = np.arange(signal.size/2+1, dtype=np.float)
+    # phasor = exp(complex(0.0, (2.0*np.pi)) * fq * bins / float(signal.size))
+    # phaser = np.exp(complex(0.0, (2.0*np.pi)) * fq * 1 / float(sig.size))
+# 
+    # ff = np.fft.irfft(phasor * np.fft.rfft(signal))
+    # 
+    # return ff
+    # 
+    # 
+# 
+# X = (X - np.min(X, 0)) / (np.max(X, 0) + 0.0001)  # 0-1 scaling
+# 
+# 
+# Setting up
+# 
+# def nudge_dataset(X, Y):
+    # """
+    # This produces a dataset 5 times bigger than the original one,
+    # by moving the 8x8 images in X around by 1px to left, right, down, up
+    # """
+    # direction_vectors = [
+        # [[0, 1, 0],
+        #  [0, 0, 0],
+        #  [0, 0, 0]],
+# 
+        # [[0, 0, 0],
+        #  [1, 0, 0],
+        #  [0, 0, 0]],
+# 
+        # [[0, 0, 0],
+        #  [0, 0, 1],
+        #  [0, 0, 0]],
+# 
+        # [[0, 0, 0],
+        #  [0, 0, 0],
+        #  [0, 1, 0]]]
+# 
+    # def shift(x, w):
+        # return convolve(x.reshape((8, 8)), mode='constant', weights=w).ravel()
+# 
+    # X = np.concatenate([X] +
+                    #    [np.apply_along_axis(shift, 1, X, vector)
+                        # for vector in direction_vectors])
+    # Y = np.concatenate([Y for _ in range(5)], axis=0)
+    # return X, Y
+# 
+# 
+# 
+# X_train, X_test, Y_train, Y_test = train_test_split(
+    # X, Y, test_size=0.2, random_state=0)
+# 
+# Models we will use
+# logistic = linear_model.LogisticRegression(solver='lbfgs', max_iter=10000,
+                                        #    multi_class='multinomial')
+# rbm = BernoulliRBM(random_state=0, verbose=True)
+# 
+# rbm_features_classifier = Pipeline(
+    # steps=[('rbm', rbm), ('logistic', logistic)])
+# 
