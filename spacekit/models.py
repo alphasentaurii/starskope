@@ -1,9 +1,60 @@
 # ********* starskøpe.spacekit.models ********* #
 
 import numpy as np
+from sklearn.preprocessing import FunctionTransformer
 
 # ********* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ ********* #
 class process:
+
+    @staticmethod
+    def fTransformer(X, func=None, fit=True, inverse=False, validate=True):
+        """
+        returns `transformer`
+
+        + log1p : applies a log transformation
+        >>> func=np.log1p(X)
+        """
+        from sklearn.preprocessing import FunctionTransformer
+
+        if func = 'log1p':
+            TF = 
+            
+        transformer = FunctionTransformer(TF, validate=True)
+        return X_transformed
+
+
+#     .. _function_transformer:
+
+# Custom transformers
+# ===================
+
+# Often, you will want to convert an existing Python function into a transformer
+# to assist in data cleaning or processing. You can implement a transformer from
+# an arbitrary function with :class:`FunctionTransformer`. For example, to build
+# a transformer that applies a log transformation in a pipeline, do::
+
+#     >>> import numpy as np
+#     >>> from sklearn.preprocessing import FunctionTransformer
+#     >>> transformer = FunctionTransformer(np.log1p, validate=True)
+#     >>> X = np.array([[0, 1], [2, 3]])
+#     >>> transformer.transform(X)
+#     array([[0.        , 0.69314718],
+#            [1.09861229, 1.38629436]])
+
+# You can ensure that ``func`` and ``inverse_func`` are the inverse of each other
+# by setting ``check_inverse=True`` and calling ``fit`` before
+# ``transform``. Please note that a warning is raised and can be turned into an
+# error with a ``filterwarnings``::
+
+#   >>> import warnings
+#   >>> warnings.filterwarnings("error", message=".*check_inverse*.",
+#   ...                         category=UserWarning, append=False)
+
+# For a full code example that demonstrates using a :class:`FunctionTransformer`
+# to do custom feature selection,
+# see :ref:`sphx_glr_auto_examples_preprocessing_plot_function_transformer.py`
+
+
 
     # NUMPY_TRAIN_TEST_SPLIT
     @staticmethod
