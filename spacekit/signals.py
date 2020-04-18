@@ -46,7 +46,7 @@ class flux:
         
         Ex1: Labeled timeseries passing 1st row of pandas dataframe
         > first create the signal:
-        star_signal_alpha = train.iloc[0, :]
+        star_signal_alpha = x_train.iloc[0, :]
         > then plot:
         star_signals(star_signal_alpha, label_col='LABEL',classes=[1,2], 
                     class_names=['No Planet', 'Planet']), figsize=(15,5))
