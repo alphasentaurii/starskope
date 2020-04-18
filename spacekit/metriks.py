@@ -11,7 +11,7 @@ calculating scores, and evaluating a machine learning model.
 #   get_preds()
 #
 # * Plots
-#   plot_keras_history()
+#   keras_history()
 #   plot_confusion_matrix()
 #   roc_plots()
 # ********* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ ********* #
@@ -39,8 +39,10 @@ class predictions:
 
         # class predictions 
         y_true = y_test.flatten()
+        y_hat = model.predict(x_test)
         y_pred = model.predict_classes(x_test).flatten() 
         preds=pd.Series(y_pred).value_counts(normalize=False)
+        
         
         if verbose:
             print(f"y_pred:\n {preds}")
@@ -56,16 +58,20 @@ class plots:
     ## James Irving: 
     @staticmethod
 
-    def keras_history(history=None, figsize=(21,11),subplot_kws={}):
+    def keras_history(model=None,history=None, figsize=(21,11),subplot_kws={}):
         """
         returns fig
         side by side sublots of training val accuracy and loss (left and right respectively)
         minor adjustments made to James Irving's code include;
+        -'model' which model iteration, eg m1
         -`history` arg set to None so we can pass in a specific model's history, e.g. `h1`
         -returns `fig`
         -increased default figsize arg
         -changed figsize=figsize in first initialization (figsize=(10,4) was hardcoded)
         """
+        if model is None:
+            model=model
+        
         if hasattr(history,'history'):
             history=history.history
         figsize=figsize
@@ -162,7 +168,9 @@ class plots:
     def roc_plots(y_test, y_hat):
         # from sklearn import metrics
         # from sklearn.metrics import roc_curve, roc_auc_score, accuracy_score
-        y_true = (y_test[:, 0] + 0.5).astype("int")   
+        #y_true = (y_test[:, 0] + 0.5).astype("int") 
+        y_true=y_test.flatten()
+          
         fpr, tpr, thresholds = roc_curve(y_true, y_hat) 
         fpr, tpr, thresholds = roc_curve(y_true, y_hat)
 
@@ -172,13 +180,14 @@ class plots:
         crossover_specificity = 1.-fpr[crossover_index]
         #print("Crossover at {0:.2f} with specificity {1:.2f}".format(crossover_cutoff, crossover_specificity))
         
-        plt.plot(thresholds, 1.-fpr)
-        plt.plot(thresholds, tpr)
+        fig, ax1, ax2 = plt.figure(ncols=2, figsize=(15,5))
+        ax1.plot(thresholds, 1.-fpr)
+        ax1.plot(thresholds, tpr)
         plt.title("Crossover at {0:.2f} with specificity {1:.2f}".format(crossover_cutoff, crossover_specificity))
         plt.show()
 
-        plt.plot(fpr, tpr)
-        plt.title("ROC area under curve is {0:.2f}".format(roc_auc_score(y_true, y_hat)))
+        ax2.plot(fpr, tpr)
+        ax2.title("ROC area under curve is {0:.2f}".format(roc_auc_score(y_true, y_hat)))
         plt.show()
         
         roc = roc_auc_score(y_true,y_hat)
@@ -189,19 +198,30 @@ class plots:
 
     ### EVALUATE_MODEL ###
     @staticmethod
-    def score(x_test, y_test, model=None, history=None, **kwargs):
+    def score(x_test, y_test, model=None, get_preds=False, confusion_matrix=True, ROC=True, hist=True, **kwargs):
         """
-        
+        evaluates the model predictions and stores the output in a dictionary `score`
         """
-        # from sklearn import metrics
-        # from sklearn.metrics import jaccard_score
-        # from sklearn.metrics import confusion_matrix
+        from spacekit.metriks import get_preds, plot_confusion_matrix, keras_history, roc_plots
+        from sklearn import metrics
+        from sklearn.metrics import jaccard_score
+        from sklearn.metrics import confusion_matrix
 
-        # PREDICTIONS
-        # y_true = y_test.flatten()
-        # y_pred = model.predict_classes(x_test).flatten() # class predictions 
+        score = {}
+        if model is None:
+            model = model
+        if get_preds: 
+        # class predictions 
+            y_true = y_test.flatten()
+            y_pred = model.predict_classes(x_test).flatten() 
+
         y_true, y_pred = get_preds(x_test,y_test,model,**kwargs)
-        
+        summary = model.summary
+
+
+        model_idx = {'model':model, 'summary':summary,'y_true':y_true,'y_pred':y_pred}
+        score['model']=model_idx
+
         # CLASSIFICATION REPORT
         num_dashes=20
         print('\n')
@@ -209,31 +229,49 @@ class plots:
         print('\tCLASSIFICATION REPORT:')
         print('---'*num_dashes)
         report = metrics.classification_report(y_true,y_pred)
-        print(report)
         
-        # jaccard similarity score  
+        # scores
         jaccard = jaccard_score(y_test, y_pred)
         acc = accuracy_score(y_true, y_pred)
         recall = recall_score(y_true, y_pred)
 
+        scores = {}
+        scores['jaccard'] = jaccard
+        scores['accuracy'] = acc
+        scores['recall'] = recall
+
         print('Jaccard Similarity Score:',jaccard)
         print('\nAccuracy Score:', acc)
         print('\nRecall Score:', recall_score)
+
         
+        score_idx = {'report':report,'scores':scores}
+        score['report'] = score_idx
+
         # CONFUSION MATRIX
-        cm = confusion_matrix(y_true, y_pred, labels=[0,1])
-        # Plot normalized confusion matrix
-        fig = plot_confusion_matrix(cm, classes=['No Planet', 'Planet'], 
-                                    normalize=False,                               
-                                    title='Normalized confusion matrix')
-        plt.show()
+        if confusion_matrix:
+            CM = confusion_matrix(y_true, y_pred, labels=[0,1])
+            
+            # Plot confusion matrix
+            fig = plot_confusion_matrix(cm, classes=['No Planet', 'Planet'], 
+                                        normalize=False,                               
+                                        title='Confusion matrix')
+            plt.show()
+
+            return CM
+
 
         # ROC Area Under Curve
-        roc = roc_plots(y_test, y_pred)
+        if roc:
+            ROC = roc_plots(y_test, y_pred)
+
         
         #Plot Model Training Results (PLOT KERAS HISTORY)
-        if history:
-            plot_keras_history(history)
+        HIST = plot_keras_history(history)
         
-        return 
+        plot_idx = {'CM':CM,'HIST':HIST,'ROC':ROC}
+
+        score['plots'] = plot_idx
+
+        return score
 

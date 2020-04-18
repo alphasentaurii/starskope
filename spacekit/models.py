@@ -6,30 +6,106 @@ from sklearn.preprocessing import FunctionTransformer
 # ********* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ ********* #
 class process:
 
+    # TRANSFORMER
+    ### WORK IN PROGRESS
     @staticmethod
-    def fTransformer(X, func=None, fit=True, inverse=False, validate=True):
+    def Transformer(X, func=None, inverse_func=None, validate=None, accept_sparse=False, 
+                    pass_y='deprecated', check_inverse=True, kw_args=None, inv_kw_args=None):
+        
         """
-        returns `transformer`
+        FunctionTransformer
+        default: returns `XF` transformer ready for fitting
+        fit : (boolean) transforms,fits and returns data Xt 
+        inverse: (bool) runs inverse transformation, returns Xi
 
-        + log1p : applies a log transformation
-        >>> func=np.log1p(X)
-        """
-        from sklearn.preprocessing import FunctionTransformer
+        Parameters
+        func : callable, optional default=None
 
-        if func = 'log1p':
-            TF = 
-            
-        transformer = FunctionTransformer(TF, validate=True)
-        return X_transformed
+            The callable to use for the transformation. This will be passed  
+            the same arguments as transform, with args and kwargs forwarded.  
+            If func is None, then func will be the identity function.  
+        inverse_func : callable, optional default=None
+
+            The callable to use for the inverse transformation. This will be  
+            passed the same arguments as inverse transform, with args and  
+            kwargs forwarded. If inverse_func is None, then inverse_func  
+            will be the identity function.  
+        
+        class FunctionTransformer(func=None, inverse_func=None, validate=None, accept_sparse=False, pass_y='deprecated', check_inverse=True, kw_args=None, inv_kw_args=None)
+        Constructs a transformer from an arbitrary callable.
+
+         This is useful for stateless transformations such as taking the log of frequencies, doing custom scaling, etc.
+
+        Note: If a lambda is used as the function, then the resulting transformer will not be pickleable.
 
 
-#     .. _function_transformer:
+        validate : bool, optional default=True
 
-# Custom transformers
-# ===================
+            Indicate that the input X array should be checked before calling  
+            `func`. The possibilities are:  
 
-# Often, you will want to convert an existing Python function into a transformer
-# to assist in data cleaning or processing. You can implement a transformer from
+            - If False, there is no input validation.  
+            - If True, then X will be converted to a 2-dimensional NumPy array or  
+            sparse matrix. If the conversion is not possible an exception is  
+            raised.  
+
+            `validate=True` as default will be replaced by  
+            `validate=False` in 0.22.  
+        accept_sparse : boolean, optional
+
+            Indicate that func accepts a sparse matrix as input. If validate is  
+            False, this has no effect. Otherwise, if accept_sparse is false,  
+            sparse matrix inputs will cause an exception to be raised.  
+        pass_y : bool, optional default=False
+
+            Indicate that transform should forward the y argument to the  
+            inner callable.  
+        check_inverse : bool, default=True
+
+        Whether to check that or `func` followed by `inverse_func` leads to  
+        the original inputs. It can be used for a sanity check, raising a  
+        warning when the condition is not fulfilled.  
+        kw_args : dict, optional
+
+            Dictionary of additional keyword arguments to pass to func.  
+        inv_kw_args : dict, optional
+
+            Dictionary of additional keyword arguments to pass to inverse_func. 
+
+#         """
+#         from sklearn.preprocessing import FunctionTransformer
+
+#         # functions = dict('rbf'=RBFSampler(),
+#         #              'fourier'=np.fft.rfft(),
+#         #              'SkewedChi2',
+#         #              'log1p'=np.log1p(X))
+
+#         for k,v in functions.items():
+#             if k == func:
+#                 print(f'Building transformer: {k}')
+#                 transformer = functions[func]
+#             else:
+#                 print(f"Couldn't find Transformer named {func}")
+#                 print(f"Try one of these instead: {functions.items()}")
+        
+#         if check_inverse is True:
+#             Xt = transformer.fit(X)
+#         if fit:
+#             Xt = transformer.fit(X)
+#             Xt = transformer.transform(Xt)
+#         else: 
+#             Xt = transformer.transform(X)
+
+#         return transformer, Xt 
+
+
+# #     .. _function_transformer:
+
+# # Custom transformers
+# # ===================
+
+# # Often, you will want to convert an existing Python function into a transformer
+# # to assist in data cleaning or processing. You can implement a transformer from
 # an arbitrary function with :class:`FunctionTransformer`. For example, to build
 # a transformer that applies a log transformation in a pipeline, do::
 
@@ -37,7 +113,7 @@ class process:
 #     >>> from sklearn.preprocessing import FunctionTransformer
 #     >>> transformer = FunctionTransformer(np.log1p, validate=True)
 #     >>> X = np.array([[0, 1], [2, 3]])
-#     >>> transformer.transform(X)
+#     >>> 
 #     array([[0.        , 0.69314718],
 #            [1.09861229, 1.38629436]])
 
@@ -120,55 +196,49 @@ class process:
 
         return x_train, x_test
 
-    @staticmethod
-    # NUDGE_DATASET
-    # variation of sklearn's `nudge_dataset` function 
-    def nudge(X, Y, ):
-        """
-        This produces a dataset 5 times bigger than the original one,
-        by moving the 8x8 images in X around by 1px to left, right, down, up
-        """
-
-
-
-        direction_vectors = [
-            [[0, 1, 0],
-            [0, 0, 0],
-            [0, 0, 0]],
-
-            [[0, 0, 0],
-            [1, 0, 0],
-            [0, 0, 0]],
-
-            [[0, 0, 0],
-            [0, 0, 1],
-            [0, 0, 0]],
-
-            [[0, 0, 0],
-            [0, 0, 0],
-            [0, 1, 0]]]
-
-        def shift(x, w):
-            return convolve(x.reshape((8, 8)), mode='constant', weights=w).ravel()
-
-        X = np.concatenate([X] +
-                        [np.apply_along_axis(shift, 1, X, vector)
-                            for vector in direction_vectors])
-        Y = np.concatenate([Y for _ in range(5)], axis=0)
-        return X, Y
+    
 
 # 
-#Load Data
-# digits = datasets.load_digits()
-# X = np.asarray(digits.data, 'float32')
-
-# X, Y = nudge_dataset(X, digits.target)
-
-# X = (X - np.min(X, 0)) / (np.max(X, 0) + 0.0001)  # 0-1 scaling
 # 
-# X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
+# Setting up
 # 
-#Models we will use
-logistic = linear_model.LogisticRegression(solver='lbfgs', max_iter=10000, multi_class='multinomial')
-rbm = BernoulliRBM(random_state=0, verbose=True)
-rbm_features_classifier = Pipeline(steps=[('rbm', rbm), ('logistic', logistic)])
+# def nudge_dataset(X, Y):
+    # """
+    # This produces a dataset 5 times bigger than the original one,
+    # by moving the 8x8 images in X around by 1px to left, right, down, up
+    # """
+    # direction_vectors = [
+        # [[0, 1, 0],
+        #  [0, 0, 0],
+        #  [0, 0, 0]],
+# 
+        # [[0, 0, 0],
+        #  [1, 0, 0],
+        #  [0, 0, 0]],
+# 
+        # [[0, 0, 0],
+        #  [0, 0, 1],
+        #  [0, 0, 0]],
+# 
+        # [[0, 0, 0],
+        #  [0, 0, 0],
+        #  [0, 1, 0]]]
+# 
+    # def shift(x, w):
+        # return convolve(x.reshape((9, 9)), mode='constant', weights=w).ravel()
+# 
+    # X = np.concatenate([X] +
+                    #    [np.apply_along_axis(shift, 1, X, vector)
+                        # for vector in direction_vectors])
+    # Y = np.concatenate([Y for _ in range(5)], axis=0)
+    # return X, Y
+# 
+
+# Models we will use
+# logistic = linear_model.LogisticRegression(solver='lbfgs', max_iter=10000,
+                                        #    multi_class='multinomial')
+# rbm = BernoulliRBM(random_state=0, verbose=True)
+# 
+# rbm_features_classifier = Pipeline(
+    # steps=[('rbm', rbm), ('logistic', logistic)])
+# 

@@ -76,12 +76,10 @@ class flux:
             label = signal[label_col]
             # for labeled timeseries
             if label == 1:
-                cls = classes[0]
                 cn = class_names[0]
                 color='red'
 
             elif label == 2:
-                cls = classes[1]
                 cn = class_names[1] 
                 color='blue'
         #create appropriate title acc to class_names    
@@ -104,7 +102,7 @@ class flux:
         
         plt.figure(figsize=figsize)
         plt.scatter(pd.Series([i for i in range(1, len(signal))]), 
-                    signal[1:], marker=4, color=color, alpha=0.7)
+                    signal[1:], marker=4, color=color)
         plt.ylabel(y_units)
         plt.xlabel(x_units)
         plt.title(title_scatter)
@@ -113,7 +111,7 @@ class flux:
         # Line Plot
         plt.figure(figsize=figsize)
         plt.plot(pd.Series([i for i in range(1, len(signal))]), 
-                signal[1:], color=color, alpha=0.7)
+                signal[1:], color=color)
         plt.ylabel(y_units)
         plt.xlabel(x_units)
         plt.title(title_line)
@@ -121,18 +119,66 @@ class flux:
 
 
 
-# 
+### MAKE_SPECGRAM
+# create function for generating and saving spectograph figs
+@staticmethod
+def make_specgram(signal, Fs=None, NFFT=None, noverlap=None, mode=None,
+                  cmap=None, units=None, colorbar=False, 
+                  save_for_ML=False, fname=None,num=None,**kwargs):
+    import matplotlib
+    import matplotlib.pyplot as plt
+    if mode:
+        mode=mode
+    if cmap is None:
+      cmap='binary'
+
+    #PIX: plots only the pixelgrids -ideal for image classification
+    if save_for_ML == True:
+        # turn off everything except pixel grid
+        fig, ax = plt.subplots(figsize=(10,10),frameon=False)
+        fig, freqs, t, m = plt.specgram(signal, Fs=Fs, NFFT=NFFT, mode=mode,cmap=cmap);
+        plt.axis(False)
+        plt.show();
+
+        if fname is not None:
+            try:
+                if num:
+                    path=fname+num
+                else:
+                    path=fname
+                plt.savefig(fname+num,**pil_kwargs)
+            except:
+                print('Something went wrong while saving the img file')
+
+    else:
+        fig, ax = plt.subplots(figsize=(13,11))
+        fig, freqs, t, m = plt.specgram(signal, Fs=Fs, NFFT=NFFT, mode=mode,cmap=cmap);
+        plt.colorbar();
+        if units is None:
+            units=['Wavelength (λ)','Frequency (ν)']
+        plt.xlabel(units[0]);
+        plt.ylabel(units[1]);
+        if num:
+            title=f'Spectogram_{num}'
+        else:
+            title='Spectogram'
+        plt.title(title)
+        plt.show();
+
+    return fig, freqs, t, m
+
+
 
 ### IN PROG 
 
 
 
-    # SIGNAL_SPLITS #### WORK IN PROGRESS
-    @staticmethod
-    def signal_splits(signal, figsize=(21,11), **subplot_kws):
+    # # SIGNAL_SPLITS #### WORK IN PROGRESS
+    # @staticmethod
+    # def signal_splits(signal, figsize=(21,11), **subplot_kws):
 
-        fig, axes = plt.subplots(ncols=3, figsize=figsize, **subplot_kws)
-        axes = axes.flatten()
+    #     fig, axes = plt.subplots(ncols=3, figsize=figsize, **subplot_kws)
+    #     axes = axes.flatten()
 
 
 # def fastFourier(signal, bins):
@@ -152,53 +198,4 @@ class flux:
     # return ff
     # 
     # 
-# 
-# X = (X - np.min(X, 0)) / (np.max(X, 0) + 0.0001)  # 0-1 scaling
-# 
-# 
-# Setting up
-# 
-# def nudge_dataset(X, Y):
-    # """
-    # This produces a dataset 5 times bigger than the original one,
-    # by moving the 8x8 images in X around by 1px to left, right, down, up
-    # """
-    # direction_vectors = [
-        # [[0, 1, 0],
-        #  [0, 0, 0],
-        #  [0, 0, 0]],
-# 
-        # [[0, 0, 0],
-        #  [1, 0, 0],
-        #  [0, 0, 0]],
-# 
-        # [[0, 0, 0],
-        #  [0, 0, 1],
-        #  [0, 0, 0]],
-# 
-        # [[0, 0, 0],
-        #  [0, 0, 0],
-        #  [0, 1, 0]]]
-# 
-    # def shift(x, w):
-        # return convolve(x.reshape((8, 8)), mode='constant', weights=w).ravel()
-# 
-    # X = np.concatenate([X] +
-                    #    [np.apply_along_axis(shift, 1, X, vector)
-                        # for vector in direction_vectors])
-    # Y = np.concatenate([Y for _ in range(5)], axis=0)
-    # return X, Y
-# 
-# 
-# 
-# X_train, X_test, Y_train, Y_test = train_test_split(
-    # X, Y, test_size=0.2, random_state=0)
-# 
-# Models we will use
-# logistic = linear_model.LogisticRegression(solver='lbfgs', max_iter=10000,
-                                        #    multi_class='multinomial')
-# rbm = BernoulliRBM(random_state=0, verbose=True)
-# 
-# rbm_features_classifier = Pipeline(
-    # steps=[('rbm', rbm), ('logistic', logistic)])
 # 
