@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 
 ### Flux Signals
 ### 
-class flux:
+class Flux:
 
     @staticmethod
     def signal_plots(signal, label_col=None, classes=None, 
@@ -106,7 +106,7 @@ class flux:
         plt.ylabel(y_units)
         plt.xlabel(x_units)
         plt.title(title_scatter)
-        plt.show();
+        plt.show()
 
         # Line Plot
         plt.figure(figsize=figsize)
@@ -115,20 +115,13 @@ class flux:
         plt.ylabel(y_units)
         plt.xlabel(x_units)
         plt.title(title_line)
-        plt.show();
+        plt.show()
 
 
 
 # check for change in relative flux vs position 
     # also subtract off bad pixels 
     #dflux = pdcflux[~bad_data]/np.nanmedian(pdcflux[~bad_data])
-<<<<<<< HEAD:spacekit/analyzers/signal.py
-
-
-
-
-=======
->>>>>>> dd11a0ab01dfb2919b13ebb35fa7672a84bebb61:spacekit/analyzers/signal.py
 
 
 ### IN PROG 
