@@ -3,6 +3,12 @@
 """ 
 helper functions for generating predictions, 
 calculating scores, and evaluating a machine learning model.
+
+TODO       
+- save metriks to textfile/pickle objs and/or dictionaries
+
+
+
 """
 # -----------------
 # STATIC CLASS METHODS 
@@ -26,38 +32,43 @@ from sklearn.metrics import accuracy_score, recall_score, confusion_matrix, roc_
 
 #PREDICTIONS
 ### GET_PREDS()
-class predictions:
+class Predictor():
 
     @staticmethod
-    def get_preds(x_test,y_test,model=None,verbose=False,**kwargs):
+    def get_preds(x_test,y_test,store=False,model=None,verbose=False,**kwargs):
     #y_true = (y_test[:, 0] + 0.5).astype("int") # flatten and make integer
     #y_hat = model.predict(x_test)[:,0] 
     # import pandas as pd
     # import numpy as np
     # from sklearn import metrics
     # from sklearn.metrics import accuracy_score, recall_score
-
+    if model is None:
+        model=model
         # class predictions 
         y_true = y_test.flatten()
         y_hat = model.predict(x_test)
         y_pred = model.predict_classes(x_test).flatten() 
-        preds=pd.Series(y_pred).value_counts(normalize=False)
-        
+        preds = pd.Series(y_pred).value_counts(normalize=False)
         
         if verbose:
             print(f"y_pred:\n {preds}")
             print("\n")
 
+        if store:
+            # store in dict
+            pre_dict = dict('yt'=y_true, 'yh'=y_hat,'yp'=y_pred,'preds'=preds)
+            
+            # save to textfile/pickle obj?
+
         return y_true, y_pred
 
 ### PLOTS
-class plots:
+class Plotter:
 
     ### PLOT_KERAS_HISTORY()
     ## Based on code by James Irving PhD / Flatiron School Study Group Notes
     ## James Irving: 
     @staticmethod
-
     def keras_history(model=None,history=None, figsize=(21,11),subplot_kws={}):
         """
         returns fig
@@ -92,33 +103,58 @@ class plots:
         [ax.legend() for ax in axes]
         [ax.xaxis.set_major_locator(mpl.ticker.MaxNLocator(integer=True)) for ax in axes]
         [ax.set(xlabel='Epochs') for ax in axes]
-        plt.suptitle('Model Training Results', y=1.01)
+        plt.suptitle('Training Results', y=1.01)
         plt.tight_layout()
         plt.show()
 
         return fig
 
-    # PLOT_CONFUSION_MATRIX()
+    # FUSION_MATRIX()
     @staticmethod
-    def plot_confusion_matrix(cmatrix, classes=None, normalize=False, title='Confusion Matrix', cmap='Blues',
+    def fusion_matrix(matrix, classes=None, normalize=False, title='Fusion Matrix', cmap='Blues',
         print_raw=False,figsize=(7,8)): 
+        """
+        FUSION MATRIX
+        -------------
+        matrix: can pass in matrix or a tuple (ytrue,ypred) to create on the fly 
+        classes: class names for target variables
+
+        *** Don't be Confused! (what is a Fusion Matrix?)
+        *** 
+        *** Well, it's a confusion matrix, but...
+        *** 
+        *** This function is designed to make the classifier's predictions easy to interpret
+        *** CMs of the past were quite confusing... Fusion  is bnet
+        *** Fusion makes more sense because in a way, we're smashing all our
+        *** little atoms of data together and measuring the energy of outputs
+        *** (as far as neural networks go this is literally true)
+        ***
+        *** So...
+        *** This is a Fusion Matrix!
+
+        """
         from sklearn import metrics                       
-        from sklearn.metrics import confusion_matrix
+        from sklearn.metrics import confusion_matrix #ugh
         import itertools
         import numpy as np
         import matplotlib.pyplot as plt
         
-        # make confusion matrix if tuple passed to cm:
-        if isinstance(cmatrix, tuple):
-            y_true = cmatrix[0].copy()
-            y_pred = cmatrix[1].copy()
-            cm = metrics.confusion_matrix(y_true, y_pred)
+        # make matrix if tuple passed to matrix:
+        if isinstance(matrix, tuple):
+            y_true = matrix[0].copy()
+            y_pred = matrix[1].copy()
+            
+            if y_true.ndim>1:
+                y_true = y_true.argmax(axis=1)
+            if y_pred.ndim>1:
+               y_pred = y_pred.argmax(axis=1)
+            fusion = metrics.confusion_matrix(y_true, y_pred)
         else:
-            cm = cmatrix
+            fusion = matrix
         
         # INTEGER LABELS
         if classes is None:
-            classes=list(range(len(cm)))
+            classes=list(range(len(matrix)))
 
         #NORMALIZING
         # Check if normalize is set to True
@@ -129,23 +165,23 @@ class plots:
         else:
             fmt='d'
         
-        
         # PLOT
         fig, ax = plt.subplots(figsize=(10,10))
-        #mask = np.zeros_like(cm, dtype=np.bool)
-        #idx = np.triu_indices_from(mask)
-        #mask[idx] = True
+        # mask = np.zeros_like(matrix, dtype=np.bool)
+        # idx = np.true_indices_from(mask)
+        # mask[idx] = True
         plt.imshow(cm, cmap=cmap, aspect='equal')
+        
         # Add title and axis labels 
-        plt.title('Confusion Matrix') 
-        plt.ylabel('True label') 
-        plt.xlabel('Pred label')
+        plt.title('FUSION Matrix') 
+        plt.ylabel('TRUE') 
+        plt.xlabel('PRED')
         
         # Add appropriate axis scales
         tick_marks = np.arange(len(classes))
         plt.xticks(tick_marks, classes, rotation=45)
         plt.yticks(tick_marks, classes)
-        #ax.set_ylim(len(cm), -.5,.5)
+        ax.set_ylim(len(cm), -.5,.5)
         
         # Text formatting
         fmt = '.2f' if normalize else 'd'
@@ -155,7 +191,7 @@ class plots:
         for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
             plt.text(j, i, format(cm[i, j], fmt),
                     horizontalalignment='center',
-                    color='darkgray' if cm[i, j] > thresh else 'black',
+                    color='white' if cm[i, j] > thresh else 'black',
                     size=14, weight='bold')
         
         # Add a legend
@@ -198,14 +234,14 @@ class plots:
 
     ### EVALUATE_MODEL ###
     @staticmethod
-    def score(x_test, y_test, model=None, get_preds=False, confusion_matrix=True, ROC=True, hist=True, **kwargs):
+    def score(x_test, y_test, model=None, get_preds=False, fusion_matrix=True, 
+        ROC=True, hist=True, **kwargs):
         """
-        evaluates the model predictions and stores the output in a dictionary `score`
+        evaluates model predictions and stores the output in a dictionary `score`
         """
-        from spacekit.metriks import get_preds, plot_confusion_matrix, keras_history, roc_plots
+        from spacekit.metriks import get_preds, fusion_matrix, keras_history, roc_plots
         from sklearn import metrics
-        from sklearn.metrics import jaccard_score
-        from sklearn.metrics import confusion_matrix
+        from sklearn.metrics import jaccard_score,confusion_matrix
 
         score = {}
         if model is None:
@@ -218,7 +254,7 @@ class plots:
         y_true, y_pred = get_preds(x_test,y_test,model,**kwargs)
         summary = model.summary
 
-
+        # save in dictionary
         model_idx = {'model':model, 'summary':summary,'y_true':y_true,'y_pred':y_pred}
         score['model']=model_idx
 
@@ -228,37 +264,37 @@ class plots:
         print('---'*num_dashes)
         print('\tCLASSIFICATION REPORT:')
         print('---'*num_dashes)
+        # generate report
         report = metrics.classification_report(y_true,y_pred)
         
-        # scores
-        jaccard = jaccard_score(y_test, y_pred)
+        # calculate scores
+        jacc = jaccard_score(y_test, y_pred)
         acc = accuracy_score(y_true, y_pred)
-        recall = recall_score(y_true, y_pred)
+        rec = recall_score(y_true, y_pred)
 
+        # save in dictionary
         scores = {}
-        scores['jaccard'] = jaccard
+        scores['jaccard'] = jacc
         scores['accuracy'] = acc
-        scores['recall'] = recall
+        scores['recall'] = rec
 
-        print('Jaccard Similarity Score:',jaccard)
+        print('Jaccard Similarity Score:',jacc)
         print('\nAccuracy Score:', acc)
-        print('\nRecall Score:', recall_score)
+        print('\nRecall Score:', rec)
 
-        
+        # save in dictionary
         score_idx = {'report':report,'scores':scores}
         score['report'] = score_idx
 
-        # CONFUSION MATRIX
-        if confusion_matrix:
-            CM = confusion_matrix(y_true, y_pred, labels=[0,1])
+        # FUSION MATRIX
+        if fusion_matrix:
+            #fusion = confusion_matrix(y_true, y_pred, labels=[0,1])
             
             # Plot confusion matrix
-            fig = plot_confusion_matrix(cm, classes=['No Planet', 'Planet'], 
-                                        normalize=False,                               
-                                        title='Confusion matrix')
+            fusion = fusion_matrix(matrix=(y_true, y_pred), classes=['No Planet', 'Planet')
             plt.show()
 
-            return CM
+            return fig
 
 
         # ROC Area Under Curve
@@ -269,7 +305,7 @@ class plots:
         #Plot Model Training Results (PLOT KERAS HISTORY)
         HIST = plot_keras_history(history)
         
-        plot_idx = {'CM':CM,'HIST':HIST,'ROC':ROC}
+        plot_idx = {'Fusion':fusion,'HIST':HIST,'ROC':ROC}
 
         score['plots'] = plot_idx
 
