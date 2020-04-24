@@ -6,131 +6,6 @@ from sklearn.preprocessing import FunctionTransformer
 # ********* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ ********* #
 class process:
 
-    # TRANSFORMER
-    ### WORK IN PROGRESS
-    @staticmethod
-    def Transformer(X, func=None, inverse_func=None, validate=None, accept_sparse=False, 
-                    pass_y='deprecated', check_inverse=True, kw_args=None, inv_kw_args=None):
-        
-        """
-        FunctionTransformer
-        default: returns `XF` transformer ready for fitting
-        fit : (boolean) transforms,fits and returns data Xt 
-        inverse: (bool) runs inverse transformation, returns Xi
-
-        Parameters
-        func : callable, optional default=None
-
-            The callable to use for the transformation. This will be passed  
-            the same arguments as transform, with args and kwargs forwarded.  
-            If func is None, then func will be the identity function.  
-        inverse_func : callable, optional default=None
-
-            The callable to use for the inverse transformation. This will be  
-            passed the same arguments as inverse transform, with args and  
-            kwargs forwarded. If inverse_func is None, then inverse_func  
-            will be the identity function.  
-        
-        class FunctionTransformer(func=None, inverse_func=None, validate=None, accept_sparse=False, pass_y='deprecated', check_inverse=True, kw_args=None, inv_kw_args=None)
-        Constructs a transformer from an arbitrary callable.
-
-         This is useful for stateless transformations such as taking the log of frequencies, doing custom scaling, etc.
-
-        Note: If a lambda is used as the function, then the resulting transformer will not be pickleable.
-
-
-        validate : bool, optional default=True
-
-            Indicate that the input X array should be checked before calling  
-            `func`. The possibilities are:  
-
-            - If False, there is no input validation.  
-            - If True, then X will be converted to a 2-dimensional NumPy array or  
-            sparse matrix. If the conversion is not possible an exception is  
-            raised.  
-
-            `validate=True` as default will be replaced by  
-            `validate=False` in 0.22.  
-        accept_sparse : boolean, optional
-
-            Indicate that func accepts a sparse matrix as input. If validate is  
-            False, this has no effect. Otherwise, if accept_sparse is false,  
-            sparse matrix inputs will cause an exception to be raised.  
-        pass_y : bool, optional default=False
-
-            Indicate that transform should forward the y argument to the  
-            inner callable.  
-        check_inverse : bool, default=True
-
-        Whether to check that or `func` followed by `inverse_func` leads to  
-        the original inputs. It can be used for a sanity check, raising a  
-        warning when the condition is not fulfilled.  
-        kw_args : dict, optional
-
-            Dictionary of additional keyword arguments to pass to func.  
-        inv_kw_args : dict, optional
-
-            Dictionary of additional keyword arguments to pass to inverse_func. 
-
-#         """
-#         from sklearn.preprocessing import FunctionTransformer
-
-#         # functions = dict('rbf'=RBFSampler(),
-#         #              'fourier'=np.fft.rfft(),
-#         #              'SkewedChi2',
-#         #              'log1p'=np.log1p(X))
-
-#         for k,v in functions.items():
-#             if k == func:
-#                 print(f'Building transformer: {k}')
-#                 transformer = functions[func]
-#             else:
-#                 print(f"Couldn't find Transformer named {func}")
-#                 print(f"Try one of these instead: {functions.items()}")
-        
-#         if check_inverse is True:
-#             Xt = transformer.fit(X)
-#         if fit:
-#             Xt = transformer.fit(X)
-#             Xt = transformer.transform(Xt)
-#         else: 
-#             Xt = transformer.transform(X)
-
-#         return transformer, Xt 
-
-
-# #     .. _function_transformer:
-
-# # Custom transformers
-# # ===================
-
-# # Often, you will want to convert an existing Python function into a transformer
-# # to assist in data cleaning or processing. You can implement a transformer from
-# an arbitrary function with :class:`FunctionTransformer`. For example, to build
-# a transformer that applies a log transformation in a pipeline, do::
-
-#     >>> import numpy as np
-#     >>> from sklearn.preprocessing import FunctionTransformer
-#     >>> transformer = FunctionTransformer(np.log1p, validate=True)
-#     >>> X = np.array([[0, 1], [2, 3]])
-#     >>> 
-#     array([[0.        , 0.69314718],
-#            [1.09861229, 1.38629436]])
-
-# You can ensure that ``func`` and ``inverse_func`` are the inverse of each other
-# by setting ``check_inverse=True`` and calling ``fit`` before
-# ``transform``. Please note that a warning is raised and can be turned into an
-# error with a ``filterwarnings``::
-
-#   >>> import warnings
-#   >>> warnings.filterwarnings("error", message=".*check_inverse*.",
-#   ...                         category=UserWarning, append=False)
-
-# For a full code example that demonstrates using a :class:`FunctionTransformer`
-# to do custom feature selection,
-# see :ref:`sphx_glr_auto_examples_preprocessing_plot_function_transformer.py`
-
-
 
     # NUMPY_TRAIN_TEST_SPLIT
     @staticmethod
@@ -242,3 +117,131 @@ class process:
 # rbm_features_classifier = Pipeline(
     # steps=[('rbm', rbm), ('logistic', logistic)])
 # 
+
+
+
+
+#     # TRANSFORMER
+#     ### WORK IN PROGRESS
+#     @staticmethod
+#     def Transformer(X, func=None, inverse_func=None, validate=None, accept_sparse=False, 
+#                     pass_y='deprecated', check_inverse=True, kw_args=None, inv_kw_args=None):
+        
+#         """
+#         FunctionTransformer
+#         default: returns `XF` transformer ready for fitting
+#         fit : (boolean) transforms,fits and returns data Xt 
+#         inverse: (bool) runs inverse transformation, returns Xi
+
+#         Parameters
+#         func : callable, optional default=None
+
+#             The callable to use for the transformation. This will be passed  
+#             the same arguments as transform, with args and kwargs forwarded.  
+#             If func is None, then func will be the identity function.  
+#         inverse_func : callable, optional default=None
+
+#             The callable to use for the inverse transformation. This will be  
+#             passed the same arguments as inverse transform, with args and  
+#             kwargs forwarded. If inverse_func is None, then inverse_func  
+#             will be the identity function.  
+        
+#         class FunctionTransformer(func=None, inverse_func=None, validate=None, accept_sparse=False, pass_y='deprecated', check_inverse=True, kw_args=None, inv_kw_args=None)
+#         Constructs a transformer from an arbitrary callable.
+
+#          This is useful for stateless transformations such as taking the log of frequencies, doing custom scaling, etc.
+
+#         Note: If a lambda is used as the function, then the resulting transformer will not be pickleable.
+
+
+#         validate : bool, optional default=True
+
+#             Indicate that the input X array should be checked before calling  
+#             `func`. The possibilities are:  
+
+#             - If False, there is no input validation.  
+#             - If True, then X will be converted to a 2-dimensional NumPy array or  
+#             sparse matrix. If the conversion is not possible an exception is  
+#             raised.  
+
+#             `validate=True` as default will be replaced by  
+#             `validate=False` in 0.22.  
+#         accept_sparse : boolean, optional
+
+#             Indicate that func accepts a sparse matrix as input. If validate is  
+#             False, this has no effect. Otherwise, if accept_sparse is false,  
+#             sparse matrix inputs will cause an exception to be raised.  
+#         pass_y : bool, optional default=False
+
+#             Indicate that transform should forward the y argument to the  
+#             inner callable.  
+#         check_inverse : bool, default=True
+
+#         Whether to check that or `func` followed by `inverse_func` leads to  
+#         the original inputs. It can be used for a sanity check, raising a  
+#         warning when the condition is not fulfilled.  
+#         kw_args : dict, optional
+
+#             Dictionary of additional keyword arguments to pass to func.  
+#         inv_kw_args : dict, optional
+
+#             Dictionary of additional keyword arguments to pass to inverse_func. 
+
+# #         """
+#         from sklearn.preprocessing import FunctionTransformer
+
+#         # functions = dict('rbf'=RBFSampler(),
+#         #              'fourier'=np.fft.rfft(),
+#         #              'SkewedChi2',
+#         #              'log1p'=np.log1p(X))
+
+#         for k,v in functions.items():
+#             if k == func:
+#                 print(f'Building transformer: {k}')
+#                 transformer = functions[func]
+#             else:
+#                 print(f"Couldn't find Transformer named {func}")
+#                 print(f"Try one of these instead: {functions.items()}")
+        
+#         if check_inverse is True:
+#             Xt = transformer.fit(X)
+#         if fit:
+#             Xt = transformer.fit(X)
+#             Xt = transformer.transform(Xt)
+#         else: 
+#             Xt = transformer.transform(X)
+
+#         return transformer, Xt 
+
+
+# #     .. _function_transformer:
+
+# # Custom transformers
+# # ===================
+
+# # Often, you will want to convert an existing Python function into a transformer
+# # to assist in data cleaning or processing. You can implement a transformer from
+# an arbitrary function with :class:`FunctionTransformer`. For example, to build
+# a transformer that applies a log transformation in a pipeline, do::
+
+#     >>> import numpy as np
+#     >>> from sklearn.preprocessing import FunctionTransformer
+#     >>> transformer = FunctionTransformer(np.log1p, validate=True)
+#     >>> X = np.array([[0, 1], [2, 3]])
+#     >>> 
+#     array([[0.        , 0.69314718],
+#            [1.09861229, 1.38629436]])
+
+# You can ensure that ``func`` and ``inverse_func`` are the inverse of each other
+# by setting ``check_inverse=True`` and calling ``fit`` before
+# ``transform``. Please note that a warning is raised and can be turned into an
+# error with a ``filterwarnings``::
+
+#   >>> import warnings
+#   >>> warnings.filterwarnings("error", message=".*check_inverse*.",
+#   ...                         category=UserWarning, append=False)
+
+# For a full code example that demonstrates using a :class:`FunctionTransformer`
+# to do custom feature selection,
+# see :ref:`sphx_glr_auto_examples_preprocessing_plot_function_transformer.py`
+
