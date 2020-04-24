@@ -122,10 +122,13 @@ class flux:
 # check for change in relative flux vs position 
     # also subtract off bad pixels 
     #dflux = pdcflux[~bad_data]/np.nanmedian(pdcflux[~bad_data])
+<<<<<<< HEAD:spacekit/analyzers/signal.py
 
 
 
 
+=======
+>>>>>>> dd11a0ab01dfb2919b13ebb35fa7672a84bebb61:spacekit/analyzers/signal.py
 
 
 ### IN PROG 
