@@ -2,29 +2,28 @@
 
 import numpy as np
 from sklearn.preprocessing import FunctionTransformer
+from sklearn.model_selection import train_test_split
 
 # ********* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ ********* #
-class process:
+class Process:
 
-
-    # NUMPY_TRAIN_TEST_SPLIT
+    # TRANSFORM SPLIT
     @staticmethod
-    def numpy_train_test_split(data_folder, train_set, test_set):
+    def transform_split(dataset, test_size=0.2):
         """
-        create target classes for training and test data using numpy
+        create target classes for training and test data
         returns x_train, y_train, x_test, y_test
         """
         import numpy as np
+        from sklearn.model_selection import train_test_split
+
+        X = np.asarray(dataset.iloc[:,1:])
+        y = np.asarray(dataset.iloc[:,0]) - 1
         
-        train = np.loadtxt(data_folder+train_set, skiprows=1, delimiter=',')
-        x_train = train[:, 1:]
-        y_train = train[:, 0, np.newaxis] - 1.
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
         
-        test = np.loadtxt(data_folder+test_set, skiprows=1, delimiter=',')
-        x_test = test[:, 1:]
-        y_test = test[:, 0, np.newaxis] - 1.
-        
-        return x_train, y_train, x_test, y_test
+        return X_train, X_test, y_train, y_test 
+
 
 
     # ZERO_SCALER
