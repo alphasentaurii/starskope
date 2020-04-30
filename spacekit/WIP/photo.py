@@ -1,4 +1,6 @@
 
+# From Kyle Pearson
+
 # PHOTO-METRY : "light" + "measure"
 # PHOTO-GRAPHY : "light" + "write"
 # ...PHOTONS !

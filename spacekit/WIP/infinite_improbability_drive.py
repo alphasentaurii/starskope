@@ -1,10 +1,9 @@
 
-
+# TODO 
 class Computer(object):
     pass
     name = self.name
     #computer = self.computer
-
 
 
 class InfiniteImprobabilityDrive(Computer):

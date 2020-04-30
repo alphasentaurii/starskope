@@ -1,20 +1,17 @@
 
-# ********* starskøpe.Spacekit.modelMetrics ********* #
+# ********* starskøpe.Spacekit.signal ********* #
 """
-model_metriks() 
-helper functions for generating predictions, 
-calculating scores, and evaluating a machine learning model.
+signal
+helper functions for signal and wave analysis  
+
 """
 # -----------------
 # STATIC CLASS METHODS 
 # -----------------
-# * predictions 
-#   get_preds()
+# * Flux 
+#       signal_plots() 
 #
-# * Plots
-#   plot_keras_history()
-#   plot_confusion_matrix()
-#   roc_plots()
+# 
 # ********* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ ********* #
 
 import pandas as pd
@@ -28,8 +25,8 @@ import matplotlib.pyplot as plt
 class Flux:
 
     @staticmethod
-    def signal_plots(signal, label_col=None, classes=None, 
-                    class_names=None, figsize=(15,5), y_units=None, x_units=None):
+    def atomic_vector_plotter(signal, label_col=None, classes=None, class_names=None, figsize=(15,5), 
+    y_units=None, x_units=None):
         """
         Plots scatter and line plots of time series signal values.  
         
@@ -119,6 +116,98 @@ class Flux:
 
 
 
+    ### MAKE_SPECGRAM
+    # create function for generating and saving spectograph figs
+    @staticmethod
+    def make_specgram(signal, Fs=None, NFFT=None, noverlap=None, mode=None,
+                    cmap=None, units=None, colorbar=False, 
+                    save_for_ML=False, fname=None,num=None,**kwargs):
+        import matplotlib
+        import matplotlib.pyplot as plt
+        if mode:
+            mode=mode
+        if cmap is None:
+            cmap='binary'
+
+        #PIX: plots only the pixelgrids -ideal for image classification
+        if save_for_ML == True:
+            # turn off everything except pixel grid
+            fig, ax = plt.subplots(figsize=(10,10),frameon=False)
+            fig, freqs, t, m = plt.specgram(signal, Fs=Fs, NFFT=NFFT, mode=mode,cmap=cmap)
+            ax.axis(False)
+            ax.show()
+
+            if fname is not None:
+                try:
+                    if num:
+                        path=fname+num
+                    else:
+                        path=fname
+                    plt.savefig(path,**pil_kwargs)
+                except:
+                    print('Something went wrong while saving the img file')
+
+        else:
+            fig, ax = plt.subplots(figsize=(13,11))
+            fig, freqs, t, m = plt.specgram(signal, Fs=Fs, NFFT=NFFT, mode=mode,cmap=cmap)
+            plt.colorbar()
+            if units is None:
+                units=['Wavelength (λ)','Frequency (ν)']
+            plt.xlabel(units[0])
+            plt.ylabel(units[1])
+            if num:
+                title=f'Spectogram_{num}'
+            else:
+                title='Spectogram'
+            plt.title(title)
+            plt.show()
+
+        return fig, freqs, t, m
+
+
+# todo
+# estimate_period
+# --> BoxCox
+# --> Lomb-Scargle
+
+    @staticmethod
+    def phase_bin(time,flux,per,tmid=0,cadence=16,offset=0.25):
+        '''
+            Phase fold data and bin according to time cadence
+            time - [days]
+            flux - arbitrary unit
+            per - period in [days]
+            tmid - value in days
+            cadence - spacing to bin data to [minutes] 
+        '''
+        phase = ((time-tmid)/per + offset)%1
+
+        sortidx = np.argsort(phase)
+        sortflux = flux[sortidx]
+        sortphase = phase[sortidx]
+
+        cad = cadence/60./24/per # phase cadence according to kepler cadence
+        pbins = np.arange(0,1+cad,cad) # phase bins
+        bindata = np.zeros(pbins.shape[0]-1)
+        for i in range(pbins.shape[0]-1):
+            pidx = (sortphase > pbins[i]) & (sortphase < pbins[i+1])
+
+            if pidx.sum() == 0 or np.isnan(sortflux[pidx]).all():
+                bindata[i] = np.nan
+                continue
+
+            bindata[i] = np.nanmean(sortflux[pidx])
+
+        phases = pbins[:-1]+np.diff(pbins)*0.5
+
+        # remove nans
+        #nonans = ~np.isnan(bindata)
+        #return phases[nonans],bindata[nonans]
+        return phases, bindata
+
+
+
+
 # check for change in relative flux vs position 
     # also subtract off bad pixels 
     #dflux = pdcflux[~bad_data]/np.nanmedian(pdcflux[~bad_data])
@@ -154,4 +243,3 @@ class Flux:
 
     #     fig, axes = plt.subplots(ncols=3, figsize=figsize, **subplot_kws)
     #     axes = axes.flatten()
-# 
