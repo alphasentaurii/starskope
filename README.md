@@ -3,20 +3,20 @@
 
 
 
-**Building a Cyberoptic Neural Network Telescope for Astrophysical Object Classification**
+**Building a Cyberoptic Artificial Telescope for Astrophysical Object Classification**
 
 > Flatiron School Capstone Project
 * `Author: Ru Keïn`
 * `Instructor: James Irving PhD`
 * `Data Science Full-Time Program`
-* `Blog post URL:` http://www.hakkeray.com/datascience/2020/03/22/planetX-hunter-classification-algorithms.html
+* `Blog post:` http://www.hakkeray.com/datascience/2020/03/22/planetX-hunter-classification-algorithms.html
 * `Non-Technical Presentation`: Datascience-CAPSTONE-starskope.pdf
 
     Note: this project is divided into 3 notebooks:
 
-    starskøpe I : Keras Neural Network Model (this notebook)
-    starskøpe II: Computer Vision/Restricted Boltzmann Machines for Spectographs
-    starskøpe III: CV/RBMs for Fourier Transformed Spectographs
+    starskøpe I : Binary Classification of K2 Timeseries Photometry Data using a Convolutional Neural Network (CNN)
+    starskøpe II: Autoencoding Restricted Boltzmann Machines for Image Classification of Raw Spectographs
+    starskøpe III: Stacking RBMs into single robust Deep Boltzmann Machine
 
 # Mission Brief
 
@@ -29,23 +29,21 @@ They say: *'Look, these differential equations--the Maxwell equations--are all t
 ---
 
 **INTRODUCTION**
-One of the reasons I quote Mr. Feynman above is because I set out to work on this project with only one year of high school physics under my belt. Despite loving the subject and even getting an A- in that one class, for some reason I did not continue pursuing physics while in school. I bought the Feynman lectures a few years back (on a whim? who does that?) and as soon as I began preparing for this project I felt intuitively that it would be somewhat ridiculous for me to build neural networks for classifying astrophysical data if I had no idea what the data meant beyond a surface level (i.e. Google), let alone on an intimate, perhaps even quantum scale. 
-
-**BACKGROUND**
-I'm intensely curious about why things work the way they do, and I'm not satisified by the answer unless I know the math behind it too. During the course of this Capstone project, I somehow managed to (that is, found it extremely necessary to) read almost all of Parts I and II of the Feynman lectures. I did that because I wanted to understand the physics, not just the math. The underlying question I am asking  -- and the ultimate argument I am proposing for astrophysics-related applications of machine learning in general -- is one that I believe Richard Feynman would agree with, were he around still today: *machine learning models for physics need to take physics into account, not simply the math.* After all, we train our own brains' neurons by learning physics before we go around making statements and predictions about the universe. Shouldn't we do the same for our algorithms?
+One of the reasons I quote Mr. Feynman above is because I set out to work on this project with only one year of high school physics under my belt. Despite loving the subject and even getting an A- in that one class, for some reason I did not continue pursuing physics while in school. I bought the Feynman lectures a few years back (on a whim? who does that?) and as soon as I began preparing for this project I felt intuitively that it would be somewhat ridiculous for me to build neural networks for classifying astrophysical data if I didn't fully grasp how and why the equations used to calculate my findings actually work.  
 
 **QUESTIONS**
-For this project, the specific questions I am looking to answer are as follows: 
+The specific questions this project seeks to answer are as follows: 
 
     1. Can a transiting exoplanet be detected strictly by analyzing the raw flux values of a given star? 
-    2. What kind of normalization, de-noising, and/or unit conversion is necessary in order for the analysis to be accurate? 
+    
+    2. What is the best approach for pre-processing photometric timeseries data and what are some of the issues we might encounter in choosing how the data is prepared for classification modeling?
+    
     3. How much signal-to-noise ratio is too much? That is, if the classes are highly imbalanced, for instance only a few planets can be confirmed out of thousands of stars, does the imbalance make for an unreliable or inaccurate model? 
     4. How do we test and validate that?
   
-To recap, the overall question is: how much actual physics do we need to know and understand as data scientists in order to make good (or preferably, great) data scientists for the world of space exploration (and thus the fields of astrophysics, astronomy, and aerospace)?
 
 **DATASET**
-To answer the above questions, I started the analysis with a labeled timeseries dataset from Kaggle posted by NASA several years ago. The reason I chose this particular dataset is because in terms of the type of information we typically need to know in order to solve a physics problem -- the primary one being UNITS, otherwise it's a math problem! -- this one is barren. The author who posted the dataset (`Winter Delta` or `W∆`) does however give us a few hints on how we *could* determine the units, and the dimensions, and a lot of other important physics-related information, if we do a little research. The biggest hint is that this dataset is from the K2 space telescope's Campaign 3 observations in which only 42 confirmed exoplanets are detected in a set of over 5,000 stars. Looking at the dataset on its own (before doing any digging), we are given little information about how long the time period covers, and we know do not know what the time intervals between flux values are. So far, this has not stopped any data scientists from attempting to tackle the classification model without gathering any additional information. 
+To answer the above questions, I started the analysis with a small labeled timeseries dataset from Kaggle posted by NASA several years ago. The reason I chose this particular dataset is because in terms of the type of information we typically need to know in order to solve a physics problem -- the primary one being UNITS, otherwise it's a math problem! -- this one is barren. The author who posted the dataset (`Winter Delta` or `W∆`) does however give us a few hints on how we *could* determine the units, and the dimensions, and a lot of other important physics-related information, if we do a little research. The biggest hint is that this dataset is from the K2 space telescope's Campaign 3 observations in which only 42 confirmed exoplanets are detected in a set of over 5,000 stars. Looking at the dataset on its own (before doing any digging), we are given little information about how long the time period covers, and we know do not know what the time intervals between flux values are. So far, this has not stopped any data scientists from attempting to tackle the classification model without gathering any additional information. 
 
 **MODEL**
 To answer the question, I first set out to build a model for the data as is, "sans-physics". The baseline model is a neural network using the Keras API in a sci-kit learn wrapper.  
@@ -87,22 +85,92 @@ Begin by importing libraries and code packages for basic analysis, as well as th
 
 
 ```python
+# fsds_1007219  v0.7.20 loaded.  Read the docs: https://fsds.readthedocs.io/en/latest/ 
+#!pip install fsds_100719
+import fsds_100719
+from fsds_100719.imports import *
+```
+
+    fsds_1007219  v0.7.20 loaded.  Read the docs: https://fsds.readthedocs.io/en/latest/ 
+
+
+
+<style  type="text/css" >
+</style><table id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfaded" ><caption>Loaded Packages and Handles</caption><thead>    <tr>        <th class="col_heading level0 col0" >Handle</th>        <th class="col_heading level0 col1" >Package</th>        <th class="col_heading level0 col2" >Description</th>    </tr></thead><tbody>
+                <tr>
+                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow0_col0" class="data row0 col0" >dp</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow0_col1" class="data row0 col1" >IPython.display</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow0_col2" class="data row0 col2" >Display modules with helpful display and clearing commands.</td>
+            </tr>
+            <tr>
+                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow1_col0" class="data row1 col0" >fs</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow1_col1" class="data row1 col1" >fsds_100719</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow1_col2" class="data row1 col2" >Custom data science bootcamp student package</td>
+            </tr>
+            <tr>
+                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow2_col0" class="data row2 col0" >mpl</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow2_col1" class="data row2 col1" >matplotlib</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow2_col2" class="data row2 col2" >Matplotlib's base OOP module with formatting artists</td>
+            </tr>
+            <tr>
+                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow3_col0" class="data row3 col0" >plt</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow3_col1" class="data row3 col1" >matplotlib.pyplot</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow3_col2" class="data row3 col2" >Matplotlib's matlab-like plotting module</td>
+            </tr>
+            <tr>
+                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow4_col0" class="data row4 col0" >np</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow4_col1" class="data row4 col1" >numpy</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow4_col2" class="data row4 col2" >scientific computing with Python</td>
+            </tr>
+            <tr>
+                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow5_col0" class="data row5 col0" >pd</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow5_col1" class="data row5 col1" >pandas</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow5_col2" class="data row5 col2" >High performance data structures and tools</td>
+            </tr>
+            <tr>
+                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow6_col0" class="data row6 col0" >sns</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow6_col1" class="data row6 col1" >seaborn</td>
+                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow6_col2" class="data row6 col2" >High-level data visualization library based on matplotlib</td>
+            </tr>
+    </tbody></table>
+
+
+
+        <script type="text/javascript">
+        window.PlotlyConfig = {MathJaxConfig: 'local'};
+        if (window.MathJax) {MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}
+        if (typeof require !== 'undefined') {
+        require.undef("plotly");
+        requirejs.config({
+            paths: {
+                'plotly': ['https://cdn.plot.ly/plotly-latest.min']
+            }
+        });
+        require(['plotly'], function(Plotly) {
+            window._Plotly = Plotly;
+        });
+        }
+        </script>
+        
+
+
+    [i] Pandas .iplot() method activated.
+
+
+
+```python
 # Import code packages and libraries
 import numpy as np
 import pandas as pd
-import matplotlib as mpl
-%matplotlib inline
-from matplotlib.colors import LogNorm
-
+import sklearn
 import seaborn as sns
+import matplotlib as mpl
 sns.set_style('whitegrid')
 import matplotlib.pyplot as plt
 plt.style.use('seaborn-bright')
  
-
 font_dict={'family':'"Titillium Web", monospace','size':16}
 mpl.rc('font',**font_dict)
-
 
 #ignore pink warnings
 import warnings
@@ -112,55 +180,75 @@ pd.set_option('display.max_columns', 0)
 # pd.set_option('display.max_rows','')
 ```
 
+
+```python
+# uncomment if you need to install
+# !pip install keras
+# !pip install tensorflow
+```
+
+
+```python
+# setting a random seed for reproducibility
+from numpy.random import seed
+seed(42)
+from tensorflow import set_random_seed
+set_random_seed(42)
+```
+
+
+```python
+# import additional libraries for keras
+import keras
+from keras.utils.np_utils import to_categorical
+
+# from keras.preprocessing.text import Tokenizer
+from keras import models, layers, optimizers
+from keras.models import Sequential, Model
+from keras.layers import Conv1D, MaxPool1D, Dense, Dropout, Flatten, \
+BatchNormalization, Input, concatenate, Activation
+from keras.optimizers import Adam
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import cross_val_score
+```
+
+    Using Theano backend.
+
+
+
+```python
+# Custom library of helper functions I created called "Spacekit"
+import spacekit
+from spacekit import analyzer,transformer,builder,computer
+```
+
 Import dataset which has already been split into train and test sets, `exoTrain.csv.zip` and `exoTest.csv.zip` (I compressed them from their original csv format since the training set is > 240 MB so we'll to unzip them).
 
 
 ```python
+# SET DIRECTORY PATHS
 import os, glob, sys
 
-home = os.path.abspath(os.curdir)
-
-os.listdir(home)
+HOME = os.path.abspath(os.curdir)
+DATA = HOME+'/DATA'
 ```
 
 
-
-
-    ['Datascience-CAPSTONE-starskope.pdf',
-     '.DS_Store',
-     'LICENSE',
-     'starskope-2.ipynb',
-     '288_planetbleed1600.jpeg',
-     'README.md',
-     'starskope.ipynb',
-     'starskope-2-colab.ipynb',
-     '.gitignore',
-     '_config.yml',
-     '.ipynb_checkpoints',
-     '.git',
-     'DATA',
-     'outputs']
-
-
-
-
 ```python
-# %cd ../
-%cd data
-%ls
+# glob puts matching filenames into a list for us - handy for working with multiple datasets
+files = glob.glob(DATA+'/*.zip')
 ```
 
-    /Users/hakkeray/CODE/CAPSTONE/starskope/DATA
-    [1m[36m__MACOSX[m[m/         exoTest.csv       exoTrain.csv
-    exoTableDraw.R    exoTest.csv.zip   exoTrain.csv.zip
 
+```python
+os.chdir(DATA)
+```
 
 
 ```python
-# uncomment below if you need to unzip the data files
-# !unzip -q 'exoTrain.csv.zip'
-# !unzip -q 'exoTest.csv.zip'
-# %ls
+# Uncomment to unzip 
+# !unzip -q '{files[0]}'
+# !unzip -q '{files[1]}'
 ```
 
 
@@ -171,22 +259,40 @@ test = pd.read_csv('exoTest.csv')
 
 
 ```python
-# cd backto home / root directory
-%cd ../
+os.chdir(HOME)
 ```
-
-    /Users/hakkeray/CODE/CAPSTONE/starskope
-
 
 # Scrub
 
-Initial inspection of data, reviewing the features, target (if any), datatypes, and checking for nulls.
+**Initial inspection of data, reviewing the features, target (if any), datatypes, and checking for nulls.**
 
-LABEL is our target column, the remaining 3197 columns are the "features" which in this case make up the frequency of the signal from each star.
+-- What we are NOT going to scrub (in this version at least) --
 
 Each star's light frequency makes up a single row of data collected over the course of the campaign (#3), which in this case for K2 campaign 3 was a little over 60 days (campaigns are normally ~80 days but c3 ended early due to data storage capacity issues. 
 
-If we crunch the numbers we'll see this means it's 29.4 minutes between each flux measurement, also known as the cadence. This also lines up with the information available in the K2 handbook.
+If we crunched the numbers (which I did elsewhere), it's 29.4 minutes between each flux measurement, also known as the cadence. This matches the information available in the K2 handbook/MAST website/NASA. Knowing the units and time intervals would allow us to scale and normalize the data very methodically. However, since our initial (math-based) model doesn't 'care' about units, the scrubbing will not take any of the physics into account. This is intentional.
+
+This is something we DO want to come back to for comparison with future models that *will* have the astrophysical properties embedded in their pre-learning process, and in particular the SCRUBBING: remember, this is a *timeseries*...it's hard to do any normalizing, scaling, de-noising to a timeseries if we don't know anything about the time units. And that's only ONE of the dimensions being completely ignored by our strict mathematical approach. The question is, will it matter? 
+
+## Initial Inspection
+
+
+```python
+# Check the value counts 
+display(train['LABEL'].value_counts(),test['LABEL'].value_counts())
+```
+
+
+    1    5050
+    2      37
+    Name: LABEL, dtype: int64
+
+
+
+    1    565
+    2      5
+    Name: LABEL, dtype: int64
+
 
 
 ```python
@@ -254,23 +360,7 @@ display(train.head(), test.head())
       <th>FLUX.38</th>
       <th>FLUX.39</th>
       <th>FLUX.40</th>
-      <th>FLUX.41</th>
-      <th>FLUX.42</th>
-      <th>FLUX.43</th>
-      <th>FLUX.44</th>
-      <th>FLUX.45</th>
-      <th>FLUX.46</th>
-      <th>FLUX.47</th>
-      <th>FLUX.48</th>
       <th>...</th>
-      <th>FLUX.3149</th>
-      <th>FLUX.3150</th>
-      <th>FLUX.3151</th>
-      <th>FLUX.3152</th>
-      <th>FLUX.3153</th>
-      <th>FLUX.3154</th>
-      <th>FLUX.3155</th>
-      <th>FLUX.3156</th>
       <th>FLUX.3157</th>
       <th>FLUX.3158</th>
       <th>FLUX.3159</th>
@@ -358,23 +448,7 @@ display(train.head(), test.head())
       <td>-192.88</td>
       <td>-182.76</td>
       <td>-195.99</td>
-      <td>-208.31</td>
-      <td>-103.22</td>
-      <td>-193.85</td>
-      <td>-187.64</td>
-      <td>-92.25</td>
-      <td>-119.25</td>
-      <td>-87.50</td>
-      <td>-1.86</td>
       <td>...</td>
-      <td>2.15</td>
-      <td>-6.04</td>
-      <td>-58.44</td>
-      <td>-29.64</td>
-      <td>-90.71</td>
-      <td>-90.71</td>
-      <td>-265.25</td>
-      <td>-367.84</td>
       <td>-317.51</td>
       <td>-167.69</td>
       <td>-56.86</td>
@@ -460,23 +534,7 @@ display(train.head(), test.head())
       <td>-29.10</td>
       <td>-34.29</td>
       <td>-24.68</td>
-      <td>-27.62</td>
-      <td>-31.21</td>
-      <td>-32.31</td>
-      <td>-37.52</td>
-      <td>-46.58</td>
-      <td>-46.20</td>
-      <td>-35.79</td>
-      <td>-42.09</td>
       <td>...</td>
-      <td>5.10</td>
-      <td>17.57</td>
-      <td>-16.46</td>
-      <td>21.43</td>
-      <td>-32.67</td>
-      <td>-32.67</td>
-      <td>-58.56</td>
-      <td>-51.99</td>
       <td>-32.14</td>
       <td>-36.75</td>
       <td>-15.49</td>
@@ -562,23 +620,7 @@ display(train.head(), test.head())
       <td>233.58</td>
       <td>171.41</td>
       <td>224.02</td>
-      <td>237.69</td>
-      <td>251.53</td>
-      <td>236.06</td>
-      <td>212.31</td>
-      <td>220.95</td>
-      <td>249.08</td>
-      <td>234.14</td>
-      <td>259.02</td>
       <td>...</td>
-      <td>-45.09</td>
-      <td>-50.22</td>
-      <td>-97.19</td>
-      <td>-64.22</td>
-      <td>-123.17</td>
-      <td>-123.17</td>
-      <td>-144.86</td>
-      <td>-106.97</td>
       <td>-56.38</td>
       <td>-51.09</td>
       <td>-33.30</td>
@@ -664,23 +706,7 @@ display(train.head(), test.head())
       <td>76.51</td>
       <td>80.26</td>
       <td>70.31</td>
-      <td>63.67</td>
-      <td>75.00</td>
-      <td>70.73</td>
-      <td>70.29</td>
-      <td>95.44</td>
-      <td>100.57</td>
-      <td>114.93</td>
-      <td>103.45</td>
       <td>...</td>
-      <td>-18.86</td>
-      <td>-11.27</td>
-      <td>-19.92</td>
-      <td>-1.99</td>
-      <td>-13.49</td>
-      <td>-13.49</td>
-      <td>-27.74</td>
-      <td>-30.46</td>
       <td>-32.40</td>
       <td>-2.75</td>
       <td>14.29</td>
@@ -766,23 +792,7 @@ display(train.head(), test.head())
       <td>-982.20</td>
       <td>-953.73</td>
       <td>-964.35</td>
-      <td>-956.60</td>
-      <td>-911.57</td>
-      <td>-885.15</td>
-      <td>-859.38</td>
-      <td>-806.16</td>
-      <td>-752.20</td>
-      <td>-792.40</td>
-      <td>-703.91</td>
       <td>...</td>
-      <td>-674.90</td>
-      <td>-705.88</td>
-      <td>-708.77</td>
-      <td>-844.59</td>
-      <td>-1023.12</td>
-      <td>-1023.12</td>
-      <td>-935.68</td>
-      <td>-848.88</td>
       <td>-732.66</td>
       <td>-694.76</td>
       <td>-705.01</td>
@@ -891,23 +901,7 @@ display(train.head(), test.head())
       <th>FLUX.38</th>
       <th>FLUX.39</th>
       <th>FLUX.40</th>
-      <th>FLUX.41</th>
-      <th>FLUX.42</th>
-      <th>FLUX.43</th>
-      <th>FLUX.44</th>
-      <th>FLUX.45</th>
-      <th>FLUX.46</th>
-      <th>FLUX.47</th>
-      <th>FLUX.48</th>
       <th>...</th>
-      <th>FLUX.3149</th>
-      <th>FLUX.3150</th>
-      <th>FLUX.3151</th>
-      <th>FLUX.3152</th>
-      <th>FLUX.3153</th>
-      <th>FLUX.3154</th>
-      <th>FLUX.3155</th>
-      <th>FLUX.3156</th>
       <th>FLUX.3157</th>
       <th>FLUX.3158</th>
       <th>FLUX.3159</th>
@@ -995,23 +989,7 @@ display(train.head(), test.head())
       <td>-48.53</td>
       <td>-38.93</td>
       <td>-26.06</td>
-      <td>6.63</td>
-      <td>29.13</td>
-      <td>64.70</td>
-      <td>79.74</td>
-      <td>12.21</td>
-      <td>12.21</td>
-      <td>-19.94</td>
-      <td>-28.60</td>
       <td>...</td>
-      <td>-11.44</td>
-      <td>-21.86</td>
-      <td>-16.38</td>
-      <td>-7.24</td>
-      <td>22.69</td>
-      <td>22.69</td>
-      <td>7.10</td>
-      <td>3.45</td>
       <td>6.49</td>
       <td>-2.55</td>
       <td>12.26</td>
@@ -1097,23 +1075,7 @@ display(train.head(), test.head())
       <td>2923.73</td>
       <td>2694.84</td>
       <td>2474.22</td>
-      <td>2195.09</td>
-      <td>1962.83</td>
-      <td>1705.44</td>
-      <td>1468.27</td>
-      <td>3730.77</td>
-      <td>3730.77</td>
-      <td>3833.30</td>
-      <td>3822.06</td>
       <td>...</td>
-      <td>-971.42</td>
-      <td>-1327.75</td>
-      <td>-1864.69</td>
-      <td>-2148.34</td>
-      <td>1166.45</td>
-      <td>1166.45</td>
-      <td>934.66</td>
-      <td>574.19</td>
       <td>-216.31</td>
       <td>-3470.75</td>
       <td>-4510.72</td>
@@ -1199,23 +1161,7 @@ display(train.head(), test.head())
       <td>-23.49</td>
       <td>13.59</td>
       <td>67.59</td>
-      <td>32.09</td>
-      <td>76.65</td>
-      <td>58.30</td>
-      <td>5.41</td>
-      <td>61.66</td>
-      <td>61.66</td>
-      <td>126.79</td>
-      <td>20.80</td>
       <td>...</td>
-      <td>-28.46</td>
-      <td>-38.15</td>
-      <td>-61.43</td>
-      <td>-127.18</td>
-      <td>-12.15</td>
-      <td>-12.15</td>
-      <td>-80.84</td>
-      <td>-112.96</td>
       <td>-129.34</td>
       <td>-35.24</td>
       <td>-70.13</td>
@@ -1301,23 +1247,7 @@ display(train.head(), test.head())
       <td>-268.50</td>
       <td>-209.56</td>
       <td>-180.44</td>
-      <td>-136.25</td>
-      <td>-136.22</td>
-      <td>-68.03</td>
-      <td>2.88</td>
-      <td>-732.94</td>
-      <td>-732.94</td>
-      <td>-613.06</td>
-      <td>-591.62</td>
       <td>...</td>
-      <td>-128.00</td>
-      <td>-219.88</td>
-      <td>-247.56</td>
-      <td>-287.50</td>
-      <td>-135.41</td>
-      <td>-135.41</td>
-      <td>40.19</td>
-      <td>81.06</td>
       <td>110.88</td>
       <td>16.50</td>
       <td>-1286.59</td>
@@ -1403,23 +1333,7 @@ display(train.head(), test.head())
       <td>25.99</td>
       <td>-667.55</td>
       <td>-1336.24</td>
-      <td>-1207.88</td>
-      <td>-310.07</td>
-      <td>6.18</td>
-      <td>18.24</td>
-      <td>48.23</td>
-      <td>7.60</td>
-      <td>34.93</td>
-      <td>20.13</td>
       <td>...</td>
-      <td>-28.68</td>
-      <td>62.41</td>
-      <td>93.07</td>
-      <td>-217.29</td>
-      <td>-217.29</td>
-      <td>-217.29</td>
-      <td>-217.29</td>
-      <td>-203.96</td>
       <td>-171.62</td>
       <td>-122.12</td>
       <td>-32.01</td>
@@ -1473,25 +1387,7 @@ Our target column `LABEL` assigns each star with a 1 or a 2 to designate whether
 Notice there are a total of only 42 stars that are labeled "2", ie confirmed exoplanet orbiting this star. 
 There are 37 exoplanet host stars in the training set, and only 5 in the test set. Such highly imbalanced classes will be something we need to deal with carefully in our model.
 
-
-```python
-# Check the value counts 
-display(train['LABEL'].value_counts(),test['LABEL'].value_counts())
-```
-
-
-    1    5050
-    2      37
-    Name: LABEL, dtype: int64
-
-
-
-    1    565
-    2      5
-    Name: LABEL, dtype: int64
-
-
-Much of the heavy lifting has already been applied to this data set, at least as far as there not being any missing data...
+## Check Nulls
 
 
 ```python
@@ -1510,20 +1406,25 @@ print('Test Nulls:',test.isna().sum().value_counts())
 
 ## Planet Host vs Non-Host Stars
 
-Since we are setting out to classify stars as being either a planet-host or non-host, it would be useful to compare the data visually and see if we can pick up on any significant differences in the flux values. The simplest way to do this is plot the signals of each type as a scatter plot and a line plot.
+Since we are setting out to classify stars as being either a planet-host or non-host, it would be useful to compare the data visually and see if we can pick up on any significant differences in the flux values with just our eyeballs. The simplest way to do this is plot the signals of each target class for a couple of stars and look at the scatter plots and a line plots.
 
 ### Threshold Crossing Event (TCE)
-TCE is determined by a significant dip in the flux values, the assumption being something crossed in front of the star blocking its light and this could be an orbiting planet! 
+TCE is determined by a significant dip in the flux values, the assumption being something crossed in front of the star blocking its light for some period of time that the telescope has designated as suspect of an orbiting planet! The occurrence of a TCE means that star is flagged as a 'Target of Interest' or in K2's case, 'Kepler Object of Ineterst' (KOI). The KOIs for each campaign have to be confirmed by a human, of course, usually an astrophysicist, and that is precisely where machine learning comes in - there are billions and billions of stars, and thus billions of billions of potential data points. "Looking for a needle in a haystack" doesn't even work as a metaphor for a scale this immense. This is the ultimate challenge for data scientists! Let's see what this looks like.
 
 
 ```python
 # grab first row of observations to create pandas series 
-# first row is label = 2 which is a confirmed exoplanet host star
-star_signal_alpha = train.iloc[0, :]
-# last row is label = 1 which shows no sign of a TCE (threshold crossing event)
-star_signal_beta = train.iloc[-1, :]
 
-display(star_signal_alpha.head(),star_signal_beta.head())
+# first row is label = 2 which is a confirmed exoplanet host star
+# TCE "Threshold Crossing Event"
+tce1 = train.iloc[0, :]
+tce2 = train.iloc[1, :]
+
+# last row is label = 1 (no tce meaning no evidence this star hosts a planet)
+no_tce1 = train.iloc[-1, :]
+no_tce2 = train.iloc[-2, :]
+
+display(tce1.head(),tce2.head(),no_tce1.head(), no_tce2.head())
 ```
 
 
@@ -1536,6 +1437,15 @@ display(star_signal_alpha.head(),star_signal_beta.head())
 
 
 
+    LABEL      2.00
+    FLUX.1   -38.88
+    FLUX.2   -33.83
+    FLUX.3   -58.54
+    FLUX.4   -40.09
+    Name: 1, dtype: float64
+
+
+
     LABEL       1.00
     FLUX.1    323.28
     FLUX.2    306.36
@@ -1545,92 +1455,13 @@ display(star_signal_alpha.head(),star_signal_beta.head())
 
 
 
-```python
-def star_signals(signal, label_col=None, classes=None, 
-                 class_names=None, figsize=(15,5), y_units=None, x_units=None):
-    """
-    Plots a scatter plot and line plot of time series signal values.  
-    
-    **ARGS
-    signal: pandas series or numpy array
-    label_col: name of the label column if using labeled pandas series
-        -use default None for numpy array or unlabeled series.
-        -this is simply for customizing plot Title to include classification    
-    classes: (optional- req labeled data) tuple if binary, array if multiclass
-    class_names: tuple or array of strings denoting what the classes mean
-    figsize: size of the figures (default = (15,5))
-    ******
-    
-    Ex1: Labeled timeseries passing 1st row of pandas dataframe
-    > first create the signal:
-    star_signal_alpha = train.iloc[0, :]
-    > then plot:
-    star_signals(star_signal_alpha, label_col='LABEL',classes=[1,2], 
-                 class_names=['No Planet', 'Planet']), figsize=(15,5))
-    
-    
-    Ex2: numpy array without any labels
-    > first create the signal:
-    
-    >then plot:
-    star_signals(signal, figsize=(15,5))
-    """
-    
-    # pass None to label_col if unlabeled data, creates generic title
-    if label_col is None:
-        label = None
-        title_scatter = "Scatterplot of Star Flux Signals"
-        title_line = "Line Plot of Star Flux Signals"
-        color='black'
-        
-    # store target column as variable 
-    elif label_col is not None:
-        label = signal[label_col]
-        # for labeled timeseries
-        if label == 1:
-            cls = classes[0]
-            cn = class_names[0]
-            color='red'
+    LABEL     1.00
+    FLUX.1    3.82
+    FLUX.2    2.09
+    FLUX.3   -3.29
+    FLUX.4   -2.88
+    Name: 5085, dtype: float64
 
-        elif label == 2:
-            cls = classes[1]
-            cn = class_names[1] 
-            color='blue'
-    #create appropriate title acc to class_names    
-        title_scatter = f"Scatterplot for Star Flux Signal: {cn}"
-        title_line = f"Line Plot for Star Flux Signal: {cn}"
-    
-    # Set x and y axis labels according to units
-    # if the units are unknown, we will default to "Flux"
-    if y_units == None:
-        y_units = 'Flux'
-    else:
-        y_units = y_units
-    # it is assumed this is a timeseries, default to "time"   
-    if x_units == None:
-        x_units = 'Time'
-    else:
-        x_units = x_units
-    
-    # Scatter Plot 
-    
-    plt.figure(figsize=figsize)
-    plt.scatter(pd.Series([i for i in range(1, len(signal))]), 
-                signal[1:], marker=4, color=color, alpha=0.7)
-    plt.ylabel(y_units)
-    plt.xlabel(x_units)
-    plt.title(title_scatter)
-    plt.show();
-
-    # Line Plot
-    plt.figure(figsize=figsize)
-    plt.plot(pd.Series([i for i in range(1, len(signal))]), 
-             signal[1:], color=color, alpha=0.7)
-    plt.ylabel(y_units)
-    plt.xlabel(x_units)
-    plt.title(title_line)
-    plt.show();
-```
 
 # A Word on Units..
 
@@ -1638,97 +1469,212 @@ After doing a little research (mostly by reading the K2 Handbook and visiting th
 
 
 ```python
-# plot scatterplots and line plots for both signals
+# View what this function is doing here:
+# atomic_vector_plotter(): 
 
-star_signals(signal=star_signal_alpha, label_col='LABEL', classes=[1,2], 
-                 class_names=['No Planet', 'Planet'], figsize=(13,5), 
-             y_units='PDC_SAP Flux', x_units='Time')
+# def atomic_vector_plotter(signal, label_col=None, classes=None, class_names=None, figsize=(15,5), 
+#     y_units=None, x_units=None):
+#         """
+#         Plots scatter and line plots of time series signal values.  
+        
+#         **ARGS
+#         signal: pandas series or numpy array
+#         label_col: name of the label column if using labeled pandas series
+#             -use default None for numpy array or unlabeled series.
+#             -this is simply for customizing plot Title to include classification    
+#         classes: (optional- req labeled data) tuple if binary, array if multiclass
+#         class_names: tuple or array of strings denoting what the classes mean
+#         figsize: size of the figures (default = (15,5))
+        
+#         ******
+        
+#         Ex1: Labeled timeseries passing 1st row of pandas dataframe
+#         > first create the signal:
+#         star_signal_alpha = x_train.iloc[0, :]
+#         > then plot:
+#         star_signals(star_signal_alpha, label_col='LABEL',classes=[1,2], 
+#                     class_names=['No Planet', 'Planet']), figsize=(15,5))
+        
+#         Ex2: numpy array without any labels
+#         > first create the signal:
+        
+#         >then plot:
+#         star_signals(signal, figsize=(15,5))
+        
+#         ######
+#         TODO: 
+#         -`signal` should take an array rather than pdseries
+#         -could allow either array or series to be passed, conv to array if series 
+#         ######
+#         """
+        
+#         # pass None to label_col if unlabeled data, creates generic title
+#         if label_col is None:
+#             label = None
+#             title_scatter = "Scatterplot of Star Flux Signals"
+#             title_line = "Line Plot of Star Flux Signals"
+#             color='black'
+            
+#         # store target column as variable 
+#         elif label_col is not None:
+#             label = signal[label_col]
+#             # for labeled timeseries
+#             if label == 1:
+#                 cn = class_names[0]
+#                 color='red'
 
-star_signals(signal=star_signal_beta, label_col='LABEL', classes=[1,2], 
-                 class_names=['No Planet', 'Planet'], figsize=(13,5),
-             y_units='PDC_SAP Flux', x_units='Time')
+#             elif label == 2:
+#                 cn = class_names[1] 
+#                 color='blue'
+#         #create appropriate title acc to class_names    
+#             title_scatter = f"Scatterplot for Star Flux Signal: {cn}"
+#             title_line = f"Line Plot for Star Flux Signal: {cn}"
+        
+#         # Set x and y axis labels according to units
+#         # if the units are unknown, we will default to "Flux"
+#         if y_units == None:
+#             y_units = 'Flux'
+#         else:
+#             y_units = y_units
+#         # it is assumed this is a timeseries, default to "time"   
+#         if x_units == None:
+#             x_units = 'Time'
+#         else:
+#             x_units = x_units
+        
+#         # Scatter Plot 
+        
+#         plt.figure(figsize=figsize)
+#         plt.scatter(pd.Series([i for i in range(1, len(signal))]), 
+#                     signal[1:], marker=4, color=color)
+#         plt.ylabel(y_units)
+#         plt.xlabel(x_units)
+#         plt.title(title_scatter)
+#         plt.show()
+
+#         # Line Plot
+#         plt.figure(figsize=figsize)
+#         plt.plot(pd.Series([i for i in range(1, len(signal))]), 
+#                 signal[1:], color=color)
+#         plt.ylabel(y_units)
+#         plt.xlabel(x_units)
+#         plt.title(title_line)
+#         plt.show()
 ```
 
 
-![png](output_25_0.png)
+```python
+from spacekit.analyzer import Flux
+
+Flux.atomic_vector_plotter(signal=tce1, label_col='LABEL', classes=[1,2], 
+         class_names=['No Planet', 'Planet'], 
+         y_units='PDC_SAP Flux', x_units='Time')
+
+Flux.atomic_vector_plotter(signal=tce2, label_col='LABEL', classes=[1,2],
+         class_names=['No Planet', 'Planet'],
+         y_units='PDC_SAP Flux', x_units='Time') 
+```
+
+
+![png](output_31_0.png)
 
 
 
-![png](output_25_1.png)
+![png](output_31_1.png)
 
 
 
-![png](output_25_2.png)
+![png](output_31_2.png)
 
 
 
-![png](output_25_3.png)
+![png](output_31_3.png)
 
 
-# Model
+This second star's flux signal pattern looks very different - are we to assume that each one of those dips is a transit event? Perhaps more than one planet is orbiting? Otherwise that would be a fairly short period. Let's compare these to the NON planet host stars:
 
 
 ```python
-# import additional libraries from sklearn
-# from sklearn.linear_model import LinearRegression
-# from sklearn.preprocessing import StandardScaler
-from scipy.ndimage.filters import uniform_filter1d
-from sklearn.model_selection import train_test_split
-from sklearn import preprocessing
-import random
+Flux.atomic_vector_plotter(signal=no_tce1, label_col='LABEL', classes=[1,2],
+                         class_names=['No Planet', 'Planet'],
+                          y_units='PDC_SAP Flux', x_units='Time')
+
+Flux.atomic_vector_plotter(signal=no_tce2, label_col='LABEL', classes=[1,2],
+                         class_names=['No Planet', 'Planet'],
+                          y_units='PDC_SAP Flux', x_units='Time') 
+```
+
+
+![png](output_33_0.png)
+
+
+
+![png](output_33_1.png)
+
+
+
+![png](output_33_2.png)
+
+
+
+![png](output_33_3.png)
+
+
+It's hard to make a fair comparison with these plots without being able to see much in detail. We need to "zoom in" - this can be accomplished through normalizing and scaling techniques, but the standard procedure for this type of data would be to perform phase-folding based on the estimated period of the transiting planets.
+
+## Pre-processing
+
+
+```python
+from spacekit.transformer import Transformer
+T = transformer.Transformer()
 ```
 
 
 ```python
-# !pip install keras
-# !pip install tensorflow
+X_train,X_test,y_train,y_test = T.hypersonic_pliers(DATA+'/exoTrain.csv', 
+                                          DATA+'/exoTest.csv') 
 ```
+
+    X_train:  (5087, 3197)
+    y_train:  (5087, 1)
+    X_test:  (570, 3197)
+    y_test:  (570, 1)
+
 
 
 ```python
-# import additional libraries for keras
-import keras
-from keras.utils.np_utils import to_categorical
+# View what this function is doing here:
+# hypersonic_pliers()
 
-# from keras.preprocessing.text import Tokenizer
-from keras import models, layers, optimizers
-
-
-from keras.models import Sequential, Model
-from keras.layers import Conv1D, MaxPool1D, Dense, Dropout, Flatten, \
-BatchNormalization, Input, concatenate, Activation
-from keras.optimizers import Adam
-```
-
-## Train-Test Split
-
-
-```python
-# Using Numpy instead of Pandas to create the 1-dimensional arrays
-def numpy_train_test_split(data_folder, train_set, test_set):
-    """
-    create target classes for training and test data using numpy
-    """
-    import numpy as np
-    
-    train = np.loadtxt(data_folder+train_set, skiprows=1, delimiter=',')
-    x_train = train[:, 1:]
-    y_train = train[:, 0, np.newaxis] - 1.
-    
-    test = np.loadtxt(data_folder+test_set, skiprows=1, delimiter=',')
-    x_test = test[:, 1:]
-    y_test = test[:, 0, np.newaxis] - 1.
-    
-    train,test
-    
-    return x_train, y_train, x_test, y_test
-```
-
-
-```python
-x_train, y_train, x_test, y_test = numpy_train_test_split(data_folder='data/', 
-                                                          train_set='exoTrain.csv', 
-                                                          test_set='exoTest.csv')
+# def hypersonic_pliers(path_to_train, path_to_test):
+        
+#         """
+#         Using Numpy to extract data into 1-dimensional arrays
+#         separate target classes (y) for training and test data
+#         assumes y (target) is first column in dataframe
+        
+#         #TODO: option to pass in column index loc for `y` if not default (0) 
+#         #TODO: option for `y` to already be 0 or 1 (don't subtract 1)
+#         #TODO: allow option for `y` to be categorical (convert via binarizer)
+#         """
+#         import numpy as np
+        
+#         Train = np.loadtxt(path_to_train, skiprows=1, delimiter=',')
+#         X_train = Train[:, 1:]
+#         y_train = Train[:, 0, np.newaxis] - 1.
+        
+#         Test = np.loadtxt(path_to_test, skiprows=1, delimiter=',')
+#         X_test = Test[:, 1:]
+#         y_test = Test[:, 0, np.newaxis] - 1.
+        
+#         del Train,Test
+#         print("X_train: ", X_train.shape)
+#         print("y_train: ", y_train.shape)
+#         print("X_test: ", X_test.shape)
+#         print("y_test: ", y_test.shape)
+        
+#         return X_train, X_test, y_train, y_test
 ```
 
 ## Scaling
@@ -1737,104 +1683,159 @@ Scale each observation to zero mean and unit variance.
 
 
 ```python
-def zero_scaler(x_train, x_test):
-    """
-    Scales each observation of an array to zero mean and unit variance.
-    Takes array for train and test data separately.
-    """
-    import numpy as np
-        
-    x_train = ((x_train - np.mean(x_train, axis=1).reshape(-1,1)) / 
-           np.std(x_train, axis=1).reshape(-1,1))
-    
-    x_test = ((x_test - np.mean(x_test, axis=1).reshape(-1,1)) / 
-              np.std(x_test, axis=1).reshape(-1,1))
- 
-    return x_train, x_test
+# Scale each row to zero mean and unit variance.
+X_train, X_test = T.thermo_fusion_chisel(X_train, X_test)
 ```
+
+    Mean:  0.0
+    Variance:  1.0
+    Mean:  2.6670356049800446e-17
+    Variance:  1.0
+
 
 
 ```python
-x_train,x_test = zero_scaler(x_train, x_test)
+# View what this function is doing here:
+# thermo_fusion_chisel()
+
+# def thermo_fusion_chisel(matrix1, matrix2=None):
+#             """
+#             Scales each array of a matrix to zero mean and unit variance.
+#             returns matrix/matrices of same shape as input but scaled
+#             matrix2 is optional - useful if data was already train-test split
+#             example: matrix1=X_train, matrix2=X_test
+            
+#             """
+#             import numpy as np
+            
+                
+#             matrix1 = ((matrix1 - np.mean(matrix1, axis=1).reshape(-1,1)) / 
+#                 np.std(matrix1, axis=1).reshape(-1,1))
+            
+#             print("Mean: ",matrix1[0].mean())
+#             print("Variance: ",matrix1[0].std())
+            
+#             if matrix2 is not None:
+#                 matrix2 = ((matrix2 - np.mean(matrix2, axis=1).reshape(-1,1)) / 
+#                     np.std(matrix2, axis=1).reshape(-1,1))
+            
+#                 print("Mean: ",matrix2[0].mean())
+#                 print("Variance: ",matrix2[0].std())
+#                 return matrix1,matrix2
+#             else:
+#                 return matrix1
 ```
 
 ## De-noising
 
-In order to reduce the amount of high frequency noise that is likely to have an adverse effect on the neural network's learning outcomes, we can try passing a uniform 1-D filter on our scaled train and test data then stack the arrays along the second axis. There are other ways of accomplishing the de-noising (not to mention the scaling and also normalization), but for now we'll take this approach in order to complete the process of building our initial baseline model.
+In order to reduce the amount of high frequency noise that is likely to have an adverse effect on the neural network's learning outcomes, we can pass a uniform 1-D filter on our scaled train and test data then stack the arrays along the second axis. There are other techniques we might want to apply for further de-noising but for now we'll start with this for the baseline.
 
 
 ```python
-def time_filter(x_train, x_test, step_size=None, axis=2):
-    """
-    Adds an input corresponding to the running average over a set number
-    of time steps. This helps the neural network to ignore high frequency 
-    noise by passing in a uniform 1-D filter and stacking the arrays. 
-    
-    **ARGS
-    step_size: integer, # timesteps for 1D filter. defaults to 200
-    axis: which axis to stack the arrays
-    """
-    import numpy as np
-    from scipy.ndimage.filters import uniform_filter1d
-    
-    if step_size is None:
-        step_size=200
-    
-    train_filter = uniform_filter1d(x_train, axis=1, size=step_size)
-    test_filter = uniform_filter1d(x_test, axis=1, size=step_size)
-    
-    x_train = np.stack([x_train, train_filter], axis=2)
-    x_test = np.stack([x_test, test_filter], axis=2)
-#     x_train = np.stack([x_train, uniform_filter1d(x_train, axis=1, 
-#                                                  size=time_steps)], axis=2)
-#     x_test = np.stack([x_test, uniform_filter1d(x_test, axis=1, 
-#                                                size=time_steps)], axis=2)
-    
-    return x_train, x_test
-```
-
-
-```python
-x_train, x_test = time_filter(x_train, x_test, step_size=200, axis=2)
-```
-
-
-```python
-import matplotlib
-matplotlib.__version__
-```
-
-
-
-
-    '3.1.1'
-
-
-
-
-```python
-
-```
-
-
-```python
-print(x_train.shape)
+print(X_train.shape)
 print(y_train.shape)
 ```
 
-    (5087, 3197, 2)
+    (5087, 3197)
     (5087, 1)
 
 
 
 ```python
-print(x_test.shape)
-print(y_test.shape)
+# we now have a 2-dimensional array for every star
+X_train, X_test = T.babel_fish_dispenser(X_train, X_test, step_size=200, 
+                                         axis=2)
 ```
 
-    (570, 3197, 2)
-    (570, 1)
+    (5087, 3197, 2) (570, 3197, 2)
 
+
+
+```python
+# View what this function is doing here:
+# babel_fish_dispenser()
+
+# def babel_fish_dispenser(matrix1, matrix2=None, step_size=None, axis=2):
+#         """        
+#         Adds an input corresponding to the running average over a set number
+#         of time steps. This helps the neural network to ignore high frequency 
+#         noise by passing in a uniform 1-D filter and stacking the arrays. 
+
+#         **ARGS
+#         step_size: integer, # timesteps for 1D filter. defaults to 200
+#         axis: which axis to stack the arrays
+
+#         ex:
+#         noise_filter(matrix1=X_train, matrix2=X_test, step_size=200)
+#         """
+#         import numpy as np
+#         from scipy.ndimage.filters import uniform_filter1d
+
+#         if step_size is None:
+#             step_size=200
+
+#         # calc input for flux signal rolling avgs 
+#         filter1 = uniform_filter1d(matrix1, axis=1, size=step_size)
+#         # store in array and stack on 2nd axis for each obs of X data
+#         matrix1 = np.stack([matrix1, filter1], axis=2)
+
+#         if matrix2 is not None:
+#             filter2 = uniform_filter1d(matrix2, axis=1, size=step_size)
+#             matrix2 = np.stack([matrix2, filter2], axis=2)
+#             print(matrix1.shape,matrix2.shape)
+#             return matrix1,matrix2
+#         else:
+#             print(matrix1.shape)
+#             return matrix1
+```
+
+
+```python
+# array on 2nd axis
+print('\nx_train[-1] flux signal rolling avgs\n')
+# plot arrays
+rolling = X_train[1][:,1]
+print(rolling)
+plt.plot(rolling)
+```
+
+    
+    x_train[-1] flux signal rolling avgs
+    
+    [-0.10910981 -0.10801068 -0.10926314 ... -0.18190533 -0.19232921
+     -0.21176035]
+
+
+
+
+
+    [<matplotlib.lines.Line2D at 0x1c3fe612d0>]
+
+
+
+
+![png](output_47_2.png)
+
+
+
+```python
+# viewed together...
+plt.plot(X_train[1][:,0])
+plt.plot(rolling)
+```
+
+
+
+
+    [<matplotlib.lines.Line2D at 0x1c3f932890>]
+
+
+
+
+![png](output_48_1.png)
+
+
+# Model
 
 ## Build Model
 
@@ -1854,185 +1855,6 @@ The RELU activation function is closest to how real neurons actually work and of
 **Batch Normalization**
 Finally, the batch normalization layers are what help to speed up convergence. 
 
-
-```python
-def keras_1D(model=Sequential(), kernel_size=11, 
-                           activation='relu', 
-                           input_shape=x_train.shape[1:], strides=4):
-    """
-    Linear neural network model using the Keras API
-    """
-    model = model
-    #layer1: the first layer will receive an input shape
-    model.add(Conv1D(filters=8, kernel_size=kernel_size, 
-                     activation=activation, input_shape=input_shape))
-    model.add(MaxPool1D(strides=strides))
-    model.add(BatchNormalization())
-    #layer2
-    model.add(Conv1D(filters=16, kernel_size=kernel_size, 
-                     activation=activation))
-    model.add(MaxPool1D(strides=strides))
-    model.add(BatchNormalization())
-    #layer3
-    model.add(Conv1D(filters=32, kernel_size=kernel_size, 
-                     activation=activation))
-    model.add(MaxPool1D(strides=strides))
-    model.add(BatchNormalization())
-    #layer4
-    model.add(Conv1D(filters=64, kernel_size=kernel_size, 
-                     activation=activation))
-    model.add(MaxPool1D(strides=strides))
-    model.add(Flatten())
-    
-    #dropout layer1 with automatic shape inference
-    model.add(Dropout(0.5))
-    model.add(Dense(64, activation=activation))
-    #dropout layer2
-    model.add(Dropout(0.25))
-    model.add(Dense(64, activation=activation))
-    # sigmoid layer
-    model.add(Dense(1, activation='sigmoid'))
-    
-    return model
-```
-
-
-```python
-
-# set our build function to use the baseline model we built initially
-keras_train = keras_1D(model=Sequential(), kernel_size=11, activation='relu', 
-                           input_shape=x_train.shape[1:], strides=4)
-```
-
-## Batch Generator
-
-To correct for the extremely unbalanced dataset, we'll ensure that the network sees 50% of the positive sample over each batch. We will also apply augmentation by rotating each of the samples randomly each time, thus generating new data. This is similar to image classification when we rotate or shift the samples each time.
-
-
-```python
-def batch_maker(x_train, y_train, batch_size=32):
-    """
-    Gives equal number of positive and negative samples rotating randomly
-    
-    generator: A generator or an instance of `keras.utils.Sequence`
-        
-    The output of the generator must be either
-    - a tuple `(inputs, targets)`
-    - a tuple `(inputs, targets, sample_weights)`.
-
-    This tuple (a single output of the generator) makes a single
-    batch. Therefore, all arrays in this tuple must have the same
-    length (equal to the size of this batch). Different batches may have 
-    different sizes. 
-
-    For example, the last batch of the epoch
-    is commonly smaller than the others, if the size of the dataset
-    is not divisible by the batch size.
-    The generator is expected to loop over its data
-    indefinitely. An epoch finishes when `steps_per_epoch`
-    batches have been seen by the model.
-    
-    """
-    import numpy
-    import random
-
-    half_batch = batch_size // 2
-    
-    # Returns a new array of given shape and type, without initializing entries.
-    # x_train.shape = (5087, 3197, 2)
-    x_batch = np.empty((batch_size, x_train.shape[1], x_train.shape[2]), dtype='float32')
-    
-    #y_train.shape = (5087, 1)
-    y_batch = np.empty((batch_size, y_train.shape[1]), dtype='float32')
-    
-    pos_idx = np.where(y_train[:,0] == 1.)[0]
-    neg_idx = np.where(y_train[:,0] == 0.)[0]
-
-    # rotating each of the samples randomly
-    while True:
-        np.random.shuffle(pos_idx)
-        np.random.shuffle(neg_idx)
-    
-        x_batch[:half_batch] = x_train[pos_idx[:half_batch]]
-        x_batch[half_batch:] = x_train[neg_idx[half_batch:batch_size]]
-        y_batch[:half_batch] = y_train[pos_idx[:half_batch]]
-        y_batch[half_batch:] = y_train[neg_idx[half_batch:batch_size]]
-    
-        for i in range(batch_size):
-            sz = np.random.randint(x_batch.shape[1])
-            x_batch[i] = np.roll(x_batch[i], sz, axis = 0)
-     
-        yield x_batch, y_batch
-```
-
-## Train Model
-
-
-```python
-def scikit_keras(build_fn=None, compiler=None, params=None, batch_size=32):
-    """
-    Builds, compiles and fits a keras model
-    Takes in dictionaries of parameters for both compiler and
-    fit_generator.
-    
-    *ARGS
-    build_fn: build function for creating model, can also pass in a model
-    compiler : dict of paramaters for model.compile()
-    params : dict of parameters for model.fit_generator
-    note: batch
-    
-    
-    """
-    # set default parameters if not made explicit
-    
-    # BUILD vars
-    if build_fn:
-        model=build_fn
-    else:
-        model = keras_1D(model=Sequential(), kernel_size=11, activation='relu', 
-                           input_shape=x_train.shape[1:], strides=4)
-
-    # COMPILE vars
-    if compiler:   
-        optimizer=compiler['optimizer']
-        learning_rate=compiler['learning_rate'] 
-        loss=compiler['loss']
-        metrics=compiler['metrics']
-     
-    else:
-        optimizer=Adam
-        learning_rate=1e-5
-        loss='binary_crossentropy'
-        metrics=['accuracy']
-        
-        
-    ##### COMPILE AND FIT #####
-    model.compile(optimizer=optimizer(learning_rate), loss=loss, 
-                  metrics=metrics)
-    
-    # HISTORY vars
-#     if generator is None:
-#         generator = batch_maker(x_train, y_train, batch_size)
-    
-    if params:
-        validation_data = params['validation_data']
-        verbose = params['verbose']
-        epochs = params['epochs']
-        steps_per_epoch = params['steps_per_epoch']
-    else:
-        validation_data = (x_test, y_test)
-        verbose=0
-        epochs=5
-        steps_per_epoch=x_train.shape[1]//32
-    
-    history = model.fit_generator(batch_maker(x_train, y_train, batch_size), 
-                                  validation_data=validation_data, 
-                                  verbose=verbose, epochs=epochs, 
-                                  steps_per_epoch=steps_per_epoch)
-    
-    return model, history
-```
-
 # `Model 1`
 
 We'll begin creating a baseline model with a lower than usual learning rate and then speed things up and fine-tune parameters for optimization in the next iterations. (The lower learning rate will help to ensure convergence.) 
@@ -2041,75 +1863,196 @@ We'll increase the learning rate in Model2 iteration and also tune any other par
 
 
 ```python
-# create params dict for compiling model
-compiler = dict(optimizer=Adam,
-                learning_rate=1e-5,
-                loss='binary_crossentropy',
-                metrics=['accuracy'])
+X_train.shape
+```
 
-# create dict for fit_generator parameters
-params = dict(validation_data = (x_test, y_test), 
-              verbose=0, 
-              epochs=5, 
-              steps_per_epoch=(x_train.shape[1]//32))
+
+
+
+    (5087, 3197, 2)
+
+
+
+
+```python
+y_train.shape
+```
+
+
+
+
+    (5087, 1)
+
+
+
+## Train Model
+
+
+```python
+from spacekit.builder import Keras
+K = builder.Keras()
 ```
 
 
 ```python
-# MODEL 1
-# using the baseline model as our build model function
-m1, h1 = scikit_keras(build_fn=keras_train, compiler=compiler, params=params)
+m1 = K.build_cnn(X_train, X_test, y_train, y_test, kernel_size=11, 
+                     activation='relu', input_shape=X_train.shape[1:], 
+                     strides=4, optimizer=Adam, learning_rate=1e-5, 
+                     loss='binary_crossentropy', metrics=['accuracy'])
 ```
+
+    BUILDING MODEL...
+    LAYER 1
+    LAYER 2
+    LAYER 3
+    LAYER 4
+    FULL CONNECTION
+    ADDING COST FUNCTION
+    COMPILED
+
 
 
 ```python
-model = m1
+# View what this function is doing here:
+# build_cnn()
+
+# def build_cnn(X_train, X_test, y_train, y_test, kernel_size=None, 
+#               activation=None, input_shape=None, strides=None, 
+#               optimizer=Adam, learning_rate=None, loss=None, metrics=None):
+#     """
+#     Builds, compiles and fits a linear CNN using Keras API
+
+#     """
+#     import keras
+#     from keras.utils.np_utils import to_categorical
+#     # from keras.preprocessing.text import Tokenizer
+#     from keras import models, layers, optimizers
+#     from keras.models import Sequential, Model
+#     from keras.layers import Conv1D, MaxPool1D, Dense, Dropout, Flatten, \
+#     BatchNormalization, Input, concatenate, Activation
+#     from keras.optimizers import Adam
+#     from keras.wrappers.scikit_learn import KerasClassifier
+#     from sklearn.model_selection import cross_val_score
+
+#     if input_shape is None:
+#         input_shape = X_train.shape[1:]
+#     if kernel_size is None:
+#         kernel_size=11
+#     if activation is None:
+#         activation='relu'
+#     if strides is None:
+#         strides = 4
+#     if learning_rate is None:
+#         learning_rate = 1e-5
+#     if loss is None:
+#         loss='binary_crossentropy'
+#     if metrics is None:
+#         metrics=['accuracy']
+
+#     print("BUILDING MODEL...")
+#     model=Sequential()
+
+#     print("LAYER 1")
+#     model.add(Conv1D(filters=8, kernel_size=kernel_size, 
+#                     activation=activation, input_shape=input_shape))
+#     model.add(MaxPool1D(strides=strides))
+#     model.add(BatchNormalization())
+
+#     print("LAYER 2")
+#     model.add(Conv1D(filters=16, kernel_size=kernel_size, 
+#                     activation=activation))
+#     model.add(MaxPool1D(strides=strides))
+#     model.add(BatchNormalization())
+
+#     print("LAYER 3")
+#     model.add(Conv1D(filters=32, kernel_size=kernel_size, 
+#                     activation=activation))
+#     model.add(MaxPool1D(strides=strides))
+#     model.add(BatchNormalization())
+
+#     print("LAYER 4")
+#     model.add(Conv1D(filters=64, kernel_size=kernel_size, 
+#                     activation=activation))
+#     model.add(MaxPool1D(strides=strides))
+#     model.add(Flatten())
+
+#     print("FULL CONNECTION")
+#     model.add(Dropout(0.5))
+#     model.add(Dense(64, activation=activation))
+#     model.add(Dropout(0.25))
+#     model.add(Dense(64, activation=activation))
+
+#     print("ADDING COST FUNCTION")
+#     model.add(Dense(1, activation='sigmoid'))
+
+#     ##### COMPILE #####
+#     model.compile(optimizer=optimizer(learning_rate), loss=loss, 
+#                 metrics=metrics)
+#     print("COMPILED")  
+
+#     return model 
 ```
 
-## Summary (M1)
+## Batch Generator
+
+To correct for the extremely unbalanced dataset, we'll ensure that the network sees 50% of the positive sample over each batch. We will also apply augmentation by rotating each of the samples randomly each time, thus generating new data. This is similar to image classification when we rotate or shift the samples each time.
 
 
 ```python
-m1.summary()
+h1 = K.fit_cnn(X_train,y_train, X_test, y_test, m1,
+               validation_data=(X_test, y_test), verbose=2, epochs=5, 
+               steps_per_epoch=(X_train.shape[1]//32), batch_size=32)
 ```
 
-    Model: "sequential_5"
+    FITTING MODEL...
+    Epoch 1/5
+     - 18s - loss: 0.7967 - accuracy: 0.5009 - val_loss: 0.6152 - val_accuracy: 0.9351
+    Epoch 2/5
+     - 17s - loss: 0.7547 - accuracy: 0.5098 - val_loss: 0.6105 - val_accuracy: 0.8509
+    Epoch 3/5
+     - 18s - loss: 0.7194 - accuracy: 0.5363 - val_loss: 0.6260 - val_accuracy: 0.7351
+    Epoch 4/5
+     - 17s - loss: 0.7406 - accuracy: 0.5107 - val_loss: 0.6455 - val_accuracy: 0.6509
+    Epoch 5/5
+     - 18s - loss: 0.7250 - accuracy: 0.5183 - val_loss: 0.6552 - val_accuracy: 0.6193
+    TRAINING COMPLETE
+    Model: "sequential_1"
     _________________________________________________________________
     Layer (type)                 Output Shape              Param #   
     =================================================================
-    conv1d_9 (Conv1D)            (None, 3187, 8)           184       
+    conv1d_1 (Conv1D)            (None, 3187, 8)           184       
     _________________________________________________________________
-    max_pooling1d_9 (MaxPooling1 (None, 797, 8)            0         
+    max_pooling1d_1 (MaxPooling1 (None, 797, 8)            0         
     _________________________________________________________________
-    batch_normalization_7 (Batch (None, 797, 8)            32        
+    batch_normalization_1 (Batch (None, 797, 8)            32        
     _________________________________________________________________
-    conv1d_10 (Conv1D)           (None, 787, 16)           1424      
+    conv1d_2 (Conv1D)            (None, 787, 16)           1424      
     _________________________________________________________________
-    max_pooling1d_10 (MaxPooling (None, 197, 16)           0         
+    max_pooling1d_2 (MaxPooling1 (None, 197, 16)           0         
     _________________________________________________________________
-    batch_normalization_8 (Batch (None, 197, 16)           64        
+    batch_normalization_2 (Batch (None, 197, 16)           64        
     _________________________________________________________________
-    conv1d_11 (Conv1D)           (None, 187, 32)           5664      
+    conv1d_3 (Conv1D)            (None, 187, 32)           5664      
     _________________________________________________________________
-    max_pooling1d_11 (MaxPooling (None, 47, 32)            0         
+    max_pooling1d_3 (MaxPooling1 (None, 47, 32)            0         
     _________________________________________________________________
-    batch_normalization_9 (Batch (None, 47, 32)            128       
+    batch_normalization_3 (Batch (None, 47, 32)            128       
     _________________________________________________________________
-    conv1d_12 (Conv1D)           (None, 37, 64)            22592     
+    conv1d_4 (Conv1D)            (None, 37, 64)            22592     
     _________________________________________________________________
-    max_pooling1d_12 (MaxPooling (None, 9, 64)             0         
+    max_pooling1d_4 (MaxPooling1 (None, 9, 64)             0         
     _________________________________________________________________
-    flatten_3 (Flatten)          (None, 576)               0         
+    flatten_1 (Flatten)          (None, 576)               0         
     _________________________________________________________________
-    dropout_5 (Dropout)          (None, 576)               0         
+    dropout_1 (Dropout)          (None, 576)               0         
     _________________________________________________________________
-    dense_7 (Dense)              (None, 64)                36928     
+    dense_1 (Dense)              (None, 64)                36928     
     _________________________________________________________________
-    dropout_6 (Dropout)          (None, 64)                0         
+    dropout_2 (Dropout)          (None, 64)                0         
     _________________________________________________________________
-    dense_8 (Dense)              (None, 64)                4160      
+    dense_2 (Dense)              (None, 64)                4160      
     _________________________________________________________________
-    dense_9 (Dense)              (None, 1)                 65        
+    dense_3 (Dense)              (None, 1)                 65        
     =================================================================
     Total params: 71,241
     Trainable params: 71,129
@@ -2117,289 +2060,175 @@ m1.summary()
     _________________________________________________________________
 
 
-## Class Predictions
-
-### Probability Values
-
 
 ```python
-# the probability values of the predictions
-# these need to be converted into binary values to be understood as far 
-# what the class predictions are
-y_hat = m1.predict(x_test)[:,0] 
-y_hat
+# View what this function is doing here:
+# fit_cnn()
+
+# def fit_cnn(X_train,y_train, X_test, y_test, model, validation_data=None, 
+#                 verbose=None, epochs=None, steps_per_epoch=None, batch_size=None):
+        
+#         if verbose is None:
+#             verbose=2
+#         if epochs is None:
+#             epochs = 5
+#         if validation_data is None:
+#             validation_data=(X_test, y_test)
+#         if steps_per_epoch is None:
+#             steps_per_epoch = (X_train.shape[1]//batch_size)
+#         if batch_size is None:
+#             batch_size = 32
+
+#         print("FITTING MODEL...")
+        
+#         def batch_maker(X_train, y_train, batch_size=batch_size):
+#                 """
+#                 Gives equal number of positive and negative samples rotating randomly                
+#                 The output of the generator must be either
+#                 - a tuple `(inputs, targets)`
+#                 - a tuple `(inputs, targets, sample_weights)`.
+
+#                 This tuple (a single output of the generator) makes a single
+#                 batch. Therefore, all arrays in this tuple must have the same
+#                 length (equal to the size of this batch). Different batches may have 
+#                 different sizes. 
+
+#                 For example, the last batch of the epoch is commonly smaller than the others, 
+#                 if the size of the dataset is not divisible by the batch size.
+#                 The generator is expected to loop over its data indefinitely. 
+#                 An epoch finishes when `steps_per_epoch` batches have been seen by the model.
+                
+#                 """
+#                 import numpy
+#                 import random
+#                 # hb: half-batch
+#                 hb = batch_size // 2
+                
+#                 # Returns a new array of given shape and type, without initializing.
+#                 # x_train.shape = (5087, 3197, 2)
+#                 xb = np.empty((batch_size, X_train.shape[1], X_train.shape[2]), dtype='float32')
+                
+#                 #y_train.shape = (5087, 1)
+#                 yb = np.empty((batch_size, y_train.shape[1]), dtype='float32')
+                
+#                 pos = np.where(y_train[:,0] == 1.)[0]
+#                 neg = np.where(y_train[:,0] == 0.)[0]
+
+#                 # rotating each of the samples randomly
+#                 while True:
+#                     np.random.shuffle(pos)
+#                     np.random.shuffle(neg)
+                
+#                     xb[:hb] = X_train[pos[:hb]]
+#                     xb[hb:] = X_train[neg[hb:batch_size]]
+#                     yb[:hb] = y_train[pos[:hb]]
+#                     yb[hb:] = y_train[neg[hb:batch_size]]
+                
+#                     for i in range(batch_size):
+#                         size = np.random.randint(xb.shape[1])
+#                         xb[i] = np.roll(xb[i], size, axis=0)
+                
+#                     yield xb, yb
+        
+#         history = model.fit_generator(batch_maker(X_train, y_train, batch_size),
+#                                         validation_data=validation_data, 
+#                                         verbose=verbose, epochs=epochs, 
+#                                         steps_per_epoch=steps_per_epoch)
+#         print("TRAINING COMPLETE")
+#         model.summary()
+
+#         return history
 ```
-
-
-
-
-    array([0.530919  , 0.51738626, 0.524384  , 0.41321602, 0.5511563 ,
-           0.32795173, 0.5106873 , 0.5612117 , 0.43855792, 0.4804491 ,
-           0.39555854, 0.50140166, 0.4499296 , 0.7180451 , 0.54435474,
-           0.47237363, 0.6119266 , 0.5292753 , 0.290318  , 0.38759863,
-           0.3710879 , 0.62837756, 0.56779474, 0.58072776, 0.44248626,
-           0.50658584, 0.53946865, 0.5768624 , 0.63863194, 0.3791237 ,
-           0.39333433, 0.46123534, 0.38098073, 0.47143   , 0.40027162,
-           0.4813469 , 0.55804807, 0.46496287, 0.24094132, 0.507898  ,
-           0.42323443, 0.22893941, 0.5532119 , 0.2630713 , 0.40238202,
-           0.42992753, 0.44642058, 0.4357788 , 0.36307332, 0.14127928,
-           0.53372216, 0.5907407 , 0.5476103 , 0.59997076, 0.5050995 ,
-           0.32312074, 0.4800474 , 0.33377615, 0.4565567 , 0.57898235,
-           0.5781783 , 0.5695022 , 0.29058912, 0.5217019 , 0.34660065,
-           0.46119708, 0.32472047, 0.3505417 , 0.4313317 , 0.5275557 ,
-           0.5705383 , 0.39403045, 0.5253105 , 0.37416577, 0.30179363,
-           0.562756  , 0.49676982, 0.45445392, 0.567758  , 0.5680137 ,
-           0.8419337 , 0.5707284 , 0.54805523, 0.43754303, 0.5936526 ,
-           0.47762176, 0.39361605, 0.546281  , 0.39019343, 0.6279365 ,
-           0.4623438 , 0.41777033, 0.47337162, 0.47508505, 0.29920155,
-           0.41973737, 0.53231364, 0.5145746 , 0.5149667 , 0.5648742 ,
-           0.6222489 , 0.5817654 , 0.40659297, 0.6101701 , 0.48071346,
-           0.39333174, 0.49112976, 0.5407175 , 0.41483283, 0.46194452,
-           0.4454074 , 0.55084115, 0.5792704 , 0.563247  , 0.6078335 ,
-           0.27323055, 0.54219943, 0.44106632, 0.6646909 , 0.31875217,
-           0.47332633, 0.48067713, 0.40319848, 0.3634749 , 0.43528193,
-           0.4219565 , 0.38527292, 0.6297061 , 0.5130146 , 0.3635804 ,
-           0.4736248 , 0.44121456, 0.47227383, 0.53858054, 0.347077  ,
-           0.44604397, 0.4702692 , 0.4724062 , 0.6089753 , 0.49763557,
-           0.34900844, 0.46844128, 0.4130219 , 0.28097805, 0.47137994,
-           0.5914181 , 0.55949146, 0.557135  , 0.48677886, 0.31485868,
-           0.4186572 , 0.41888222, 0.49304315, 0.44315627, 0.4234315 ,
-           0.41015708, 0.5902552 , 0.773598  , 0.53177255, 0.45687202,
-           0.4048917 , 0.5942385 , 0.5527816 , 0.5877691 , 0.40582684,
-           0.35814202, 0.68383604, 0.51380956, 0.48576868, 0.34394133,
-           0.3990341 , 0.60928905, 0.67196566, 0.6013788 , 0.637428  ,
-           0.45066082, 0.36395174, 0.4398475 , 0.46660012, 0.45963523,
-           0.57647014, 0.40196872, 0.28896806, 0.5634549 , 0.48839867,
-           0.48565426, 0.37893373, 0.39569312, 0.44585478, 0.4500008 ,
-           0.5053754 , 0.39722264, 0.5305519 , 0.4981261 , 0.5014659 ,
-           0.33820134, 0.5528475 , 0.45158616, 0.4454329 , 0.4270645 ,
-           0.47141126, 0.46171156, 0.5276759 , 0.54669404, 0.4343969 ,
-           0.48704132, 0.38517582, 0.46875873, 0.5267358 , 0.55326134,
-           0.4999097 , 0.4719466 , 0.42388704, 0.41146344, 0.4318274 ,
-           0.19168049, 0.54047304, 0.4684818 , 0.551927  , 0.51300234,
-           0.5242145 , 0.5055268 , 0.49299383, 0.25352335, 0.50457096,
-           0.49896523, 0.52514225, 0.40509647, 0.28990847, 0.58784556,
-           0.54098445, 0.45309788, 0.61368227, 0.4265983 , 0.49333212,
-           0.41180137, 0.21455559, 0.62978303, 0.522638  , 0.47029743,
-           0.4008945 , 0.39700788, 0.36331326, 0.42667195, 0.38887358,
-           0.4849153 , 0.5410577 , 0.50649714, 0.3843378 , 0.4744056 ,
-           0.43912035, 0.36714625, 0.40061313, 0.42582917, 0.46585914,
-           0.51432085, 0.34872133, 0.4556672 , 0.62962604, 0.40313035,
-           0.40402758, 0.4185383 , 0.52919006, 0.5015177 , 0.41968685,
-           0.51341754, 0.3457669 , 0.4715502 , 0.291744  , 0.49079797,
-           0.4039695 , 0.392378  , 0.46342656, 0.53437835, 0.41920382,
-           0.34527972, 0.54282105, 0.6249156 , 0.6530406 , 0.5314289 ,
-           0.4301639 , 0.4043473 , 0.38781428, 0.6141419 , 0.5135738 ,
-           0.38781422, 0.5260777 , 0.31878656, 0.6026384 , 0.48507544,
-           0.41487476, 0.58390164, 0.5696454 , 0.4995578 , 0.5289438 ,
-           0.3334803 , 0.48604858, 0.6245774 , 0.4393736 , 0.47240007,
-           0.33763844, 0.57947993, 0.20368522, 0.47009772, 0.51766497,
-           0.7176566 , 0.5058288 , 0.4242788 , 0.45705998, 0.3782838 ,
-           0.46263254, 0.4648638 , 0.501644  , 0.5651593 , 0.30928218,
-           0.4105355 , 0.52520144, 0.57575244, 0.4338764 , 0.627764  ,
-           0.35515934, 0.40400964, 0.4092869 , 0.48446652, 0.58481616,
-           0.5730518 , 0.5018347 , 0.49830726, 0.3783433 , 0.52771944,
-           0.5173367 , 0.54741985, 0.4927027 , 0.48333055, 0.36770523,
-           0.22485289, 0.5034591 , 0.60179484, 0.5664701 , 0.46929273,
-           0.46042493, 0.39580923, 0.5142538 , 0.48048455, 0.37450477,
-           0.37844464, 0.5590663 , 0.80963326, 0.65188736, 0.37743685,
-           0.63885504, 0.3671996 , 0.57814723, 0.5074352 , 0.5429252 ,
-           0.45912042, 0.5356116 , 0.52242804, 0.4476528 , 0.31841612,
-           0.57650477, 0.57776535, 0.5376856 , 0.65111065, 0.2794482 ,
-           0.27829754, 0.48420456, 0.5247077 , 0.6575235 , 0.52440715,
-           0.52162945, 0.29724365, 0.49711192, 0.5273184 , 0.34857786,
-           0.53168195, 0.29712215, 0.49247113, 0.3827273 , 0.40646034,
-           0.27978405, 0.41459036, 0.44628868, 0.49007535, 0.4530134 ,
-           0.4578588 , 0.52300966, 0.42761984, 0.4477577 , 0.4393317 ,
-           0.19172862, 0.31079173, 0.40140194, 0.25360298, 0.38627046,
-           0.4974604 , 0.5132009 , 0.5784873 , 0.3754265 , 0.5045037 ,
-           0.38206843, 0.6130146 , 0.576416  , 0.45264593, 0.4842914 ,
-           0.5957036 , 0.5093199 , 0.48699483, 0.2719541 , 0.3823824 ,
-           0.35342053, 0.47539276, 0.29734993, 0.37744662, 0.56287605,
-           0.48175532, 0.5076742 , 0.5596242 , 0.32420704, 0.35198346,
-           0.859305  , 0.65556103, 0.6082994 , 0.4845547 , 0.4132297 ,
-           0.61526686, 0.38513437, 0.4911582 , 0.6853376 , 0.50103873,
-           0.11448273, 0.56489646, 0.44453332, 0.5805448 , 0.67893   ,
-           0.47536165, 0.45393884, 0.3726728 , 0.31396806, 0.4863143 ,
-           0.38945177, 0.45169634, 0.3758399 , 0.44515118, 0.5386666 ,
-           0.55616117, 0.4754178 , 0.6826506 , 0.6353088 , 0.37947115,
-           0.49204546, 0.4922037 , 0.2852646 , 0.40533572, 0.5365106 ,
-           0.5418878 , 0.48900247, 0.4576335 , 0.36913598, 0.5559964 ,
-           0.5930519 , 0.48268044, 0.57649606, 0.47620595, 0.6183643 ,
-           0.66568005, 0.46538734, 0.39640918, 0.48149458, 0.24496087,
-           0.57814217, 0.5069836 , 0.54655856, 0.42068893, 0.6332818 ,
-           0.6030253 , 0.6222219 , 0.4042381 , 0.49438944, 0.39655364,
-           0.61865515, 0.52901167, 0.51198137, 0.44461834, 0.33789337,
-           0.54713374, 0.34890753, 0.52522224, 0.53926116, 0.5017608 ,
-           0.4490298 , 0.46975997, 0.3776201 , 0.4670189 , 0.39710754,
-           0.6159359 , 0.42030776, 0.46620226, 0.51977444, 0.519538  ,
-           0.37776735, 0.30600837, 0.30245295, 0.3931782 , 0.44292757,
-           0.41217992, 0.4059553 , 0.5103006 , 0.50096226, 0.5597341 ,
-           0.37515497, 0.59198326, 0.4694767 , 0.49695715, 0.55782956,
-           0.63943994, 0.4943366 , 0.4292868 , 0.4079436 , 0.5222584 ,
-           0.51381683, 0.38934305, 0.5118788 , 0.491339  , 0.6218153 ,
-           0.55332446, 0.54774475, 0.6574875 , 0.40906063, 0.3632249 ,
-           0.34226826, 0.52135247, 0.5047478 , 0.40969783, 0.49182132,
-           0.6013845 , 0.45502377, 0.82070553, 0.43421173, 0.44975138,
-           0.6331635 , 0.28044605, 0.46149674, 0.60161275, 0.5623652 ,
-           0.42475536, 0.32717937, 0.4227332 , 0.53145444, 0.6230192 ,
-           0.52428454, 0.5709387 , 0.57927686, 0.60576844, 0.3231951 ,
-           0.28911692, 0.50168836, 0.3406566 , 0.455632  , 0.51891685,
-           0.42809212, 0.45480755, 0.531437  , 0.55758953, 0.36155784,
-           0.57777935, 0.6549137 , 0.4717369 , 0.43286335, 0.55457586],
-          dtype=float32)
-
-
-
-### Target Values
-
-
-```python
-# the test set's true values for our target class:
-y_true = (y_test[:, 0] + 0.5).astype("int")
-y_true
-```
-
-
-
-
-    array([1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-
-
-
-### Class Predictions
-
-
-```python
-# Generate class predictions for test set
-y_pred = m1.predict_classes(x_test).flatten() # class predictions in binary
-y_pred
-```
-
-
-
-
-    array([1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1,
-           1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
-           0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0,
-           0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1,
-           0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0,
-           0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
-           0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-           0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0,
-           0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0,
-           0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1,
-           1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0,
-           0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1,
-           0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0,
-           1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0,
-           0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1,
-           1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0,
-           1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1,
-           0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-           1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1,
-           0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0,
-           0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0,
-           1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0,
-           0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,
-           0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1,
-           0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1,
-           1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1],
-          dtype=int32)
-
-
-
-
-```python
-# Build these values into a function for efficiency in next model iterations:
-
-def get_preds(x_test,y_test,model=None,**kwargs):
-    #y_true = (y_test[:, 0] + 0.5).astype("int") # flatten and make integer
-    #y_hat = model.predict(x_test)[:,0] 
-    
-    y_true = y_test.flatten()
-    y_pred = model.predict_classes(x_test).flatten() # class predictions 
-    
-    
-    yhat_val = pd.Series(y_pred).value_counts(normalize=False)
-    yhat_pct = pd.Series(y_pred).value_counts(normalize=True)*100
-
-    print(f"y_hat_vals:\n {yhat_val}")
-    print("\n")
-    print(f"y_pred:\n {yhat_pct}")
-    from sklearn import metrics
-    from sklearn.metrics import accuracy_score
-    acc = accuracy_score(y_true, y_pred)
-    print('\nAccuracy Score:', acc)
-
-    from sklearn.metrics import confusion_matrix
-
-    cm = confusion_matrix(y_true, y_pred, labels=[0,1])
-    print("\nConfusion Matrix")
-    display(cm)
-```
-
-
-```python
-get_preds(x_test,y_test,model=m1)
-```
-
-    y_hat_vals:
-     0    335
-    1    235
-    dtype: int64
-    
-    
-    y_pred:
-     0    58.77193
-    1    41.22807
-    dtype: float64
-    
-    Accuracy Score: 0.5929824561403508
-    
-    Confusion Matrix
-
-
-
-    array([[334, 231],
-           [  1,   4]])
-
 
 ## Evaluate (M1)
 
 Let's assess the model thus far before tuning parameters. We'll create a few helper functions for calculating metrics and analyzing results visually. 
 
-### Scores
+## Class Predictions
 
-### Interpret Scores
-Not the most promising results. These scores are abysmal, however we are simply working with a baseline and the numbers should (hopefully) improve with some simply tuning of the hyperparameters, specifically with our learning rate and the number of epochs. 
 
-While 79% is far from optimal, we have to look at some other metrics such as recall and F1 to make a true assessment of the model's accuracy. These other metrics are especially important when working with highly imbalanced classes.
+
+
+```python
+y_true, y_pred = computer.get_preds(X_test,y_test, model=m1,verbose=True)
+```
+
+    y_pred:
+     0    354
+    1    216
+    dtype: int64
+    
+    
+
+
+
+```python
+# View function: get_preds()
+
+# def get_preds(X,y,model=None,verbose=False):
+#     if model is None:
+#         model=model
+#     # class predictions 
+#     y_true = y.flatten()
+    
+#     y_pred = model.predict_classes(X).flatten() 
+#     preds = pd.Series(y_pred).value_counts(normalize=False)
+    
+#     if verbose:
+#         print(f"y_pred:\n {preds}")
+#         print("\n")
+
+#     return y_true, y_pred
+```
+
+### Rate of False Negatives and Positives (Training)
+
+
+```python
+computer.fnfp(X_train, y_train, m1, training=True)
+```
+
+    FN Rate (Training): 0.2556%
+    FP Rate (Training): 39.3945%
+
+
+### Rate of False Negatives and Positives (Test)
+
+
+```python
+computer.fnfp(X_test, y_test, m1)
+```
+
+    FN Rate (Test): 0.5263%
+    FP Rate (Test): 37.5439%
+
+
+
+```python
+# view function: fnfp()
+
+# def fnfp(X,y,model, training=False):
+
+#     import numpy as np
+
+#     y_pred = np.round( model.predict(X) )
+
+#     pos_idx = y==1
+#     neg_idx = y==0
+
+#     #tp = np.sum(y_pred[pos_idx]==1)/y_pred.shape[0]
+#     fn = np.sum(y_pred[pos_idx]==0)/y_pred.shape[0]
+
+#     #tn = np.sum(y_pred[neg_idx]==0)/y_pred.shape[0]
+#     fp = np.sum(y_pred[neg_idx]==1)/y_pred.shape[0]
+
+#     if training:
+#         print(f"FN Rate (Training): {round(fn*100,4)}%")
+#         print(f"FP Rate (Training): {round(fp*100,4)}%")
+#     else:
+#         print(f"FN Rate (Test): {round(fn*100,4)}%")
+#         print(f"FP Rate (Test): {round(fp*100,4)}%")
+```
 
 ### Classification Report
 
@@ -2408,7 +2237,7 @@ Sci-kit learn has a nice built-in method for evaluating our model:
 
 ```python
 from sklearn import metrics
-from sklearn.metrics import roc_curve, roc_auc_score, accuracy_score, jaccard_score, f1_score, recall_score
+from sklearn.metrics import accuracy_score, f1_score, recall_score
 
 report = metrics.classification_report(y_test,y_pred)
 print(report)
@@ -2416,142 +2245,176 @@ print(report)
 
                   precision    recall  f1-score   support
     
-             0.0       1.00      0.59      0.74       565
-             1.0       0.02      0.80      0.03         5
+             0.0       0.99      0.62      0.76       565
+             1.0       0.01      0.40      0.02         5
     
-        accuracy                           0.59       570
-       macro avg       0.51      0.70      0.39       570
-    weighted avg       0.99      0.59      0.74       570
+        accuracy                           0.62       570
+       macro avg       0.50      0.51      0.39       570
+    weighted avg       0.98      0.62      0.76       570
     
 
 
-## History Metrics
+#### Fowlkes-Mallows
+
+Fowlkes-Mallows is a good metric for imbalanced datasets, along with Jaccard which is similar to F1.
+
+
+```python
+sklearn.metrics.fowlkes_mallows_score(y_true,y_pred)
+```
+
+
+
+
+    0.7207089012303081
+
+
+
+### Interpret Scores
+With only 5 epochs, the model performed high in precision. However, because this such an imbalanced dataset, recall and F1 score are more critical metrics and these could definitely be improved. We'll tune some of the hyperparameters, specifically adjusting the learning rate and increasing the number of epochs up to 40. 
+
+### History Metrics
 
 The baseline model is not meant to give us optimal results - the real test will be in our final model below. First let's take a look at some of the visuals to understand what the scores really mean. This will help us decide how to proceed in tuning the model appropriately.
 
 
 ```python
-def plot_keras_history(history,figsize=(10,4),subplot_kws={}):
-    if hasattr(history,'history'):
-        history=history.history
-    figsize=(10,4)
-    subplot_kws={}
-
-    acc_keys = list(filter(lambda x: 'acc' in x,history.keys()))
-    loss_keys = list(filter(lambda x: 'loss' in x,history.keys()))
-
-    fig,axes=plt.subplots(ncols=2,figsize=figsize,**subplot_kws)
-    axes = axes.flatten()
-
-    y_labels= ['Accuracy','Loss']
-    for a, metric in enumerate([acc_keys,loss_keys]):
-        for i in range(len(metric)):
-            ax = pd.Series(history[metric[i]],
-                        name=metric[i]).plot(ax=axes[a],label=metric[i])
-    [ax.legend() for ax in axes]
-    [ax.xaxis.set_major_locator(mpl.ticker.MaxNLocator(integer=True)) for ax in axes]
-    [ax.set(xlabel='Epochs') for ax in axes]
-    plt.suptitle('Model Training Results',y=1.01)
-    plt.tight_layout()
-    plt.show()
+computer.keras_history(h1)
 ```
+
+
+![png](output_78_0.png)
+
 
 
 ```python
-# plot convergence
-plot_keras_history(h1)
+# view function: keras_history()
+
+# def keras_history(history, figsize=(10,4)):
+#     """
+#     side by side sublots of training val accuracy and loss (left and right respectively)
+#     """
+    
+#     import matplotlib.pyplot as plt
+    
+#     fig,axes=plt.subplots(ncols=2,figsize=(15,6))
+#     axes = axes.flatten()
+
+#     ax = axes[0]
+#     ax.plot(history.history['accuracy'])
+#     ax.plot(history.history['val_accuracy'])
+#     ax.set_title('Model Accuracy')
+#     ax.set_ylabel('Accuracy')
+#     ax.set_xlabel('Epoch')
+#     ax.legend(['Train', 'Test'], loc='upper left')
+
+#     ax = axes[1]
+#     ax.plot(history.history['loss'])
+#     ax.plot(history.history['val_loss'])
+#     ax.set_title('Model Loss')
+#     ax.set_ylabel('Loss')
+#     ax.set_xlabel('Epoch')
+#     ax.legend(['Train', 'Test'], loc='upper left')
+#     plt.show()
 ```
 
+With only a few epochs, and a small learning rate, it's obvious that our training parameters have a great deal of room for improvement. This is good - we will definitely need to adjust the learning rate. If that doesn't go far enough in producing desired results, we can also try using a different optimizer such as SGD instead of Adam. For now let's look at a few other key metrics.
 
-![png](output_76_0.png)
+## Fusion Matrix
 
-
-With only a few epochs, and a small learning rate, it's obvious that our training parameters has room for improvement. This is good - we will definitely need to adjust the learning rate. If that doesn't go far enough in producing desired results, we can also try using a different optimizer such as SGD instead of Adam. For now let's lok at what the predictions actually were in plain terms.
-
-## Confusion Matrix
+It's like a confusion matrix, without the confusion...
 
 
 ```python
-# generate a confusion matrix
-from sklearn.metrics import confusion_matrix
-
-cm = confusion_matrix(y_true, y_pred, labels=[0,1])
-cm
+m1_fusion = computer.fusion_matrix(matrix=(y_true,y_pred), 
+                          classes=['No Planet','Planet'], 
+                                   title='M1 Fusion Matrix')
 ```
 
-As always, it is much easier to interpret these numbers in a plot! Better yet, build a function for the plot for reuse later on:
+
+![png](output_82_0.png)
+
 
 
 ```python
-# PLOT Confusion Matrices
+# view function: fusion_matrix()
 
-def plot_confusion_matrix(cm, classes=None,
-                          normalize=False,
-                          title='Confusion matrix',cmap=plt.cm.Blues):
+# def fusion_matrix(matrix, classes=None, normalize=False, title='Fusion Matrix', cmap='Blues',
+#     print_raw=False): 
+#     """
+#     FUSION MATRIX!
+#     -------------
+#     It's like a confusion matrix...without the confusion.
     
-    import itertools
-    # Check if normalize is set to True
-    # If so, normalize the raw confusion matrix before visualizing
-    if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        print("Normalized confusion matrix")
-    else:
-        print('Confusion matrix, without normalization')
+#     matrix: can pass in matrix or a tuple (ytrue,ypred) to create on the fly 
+#     classes: class names for target variables
+#     """
+#     from sklearn import metrics                       
+#     from sklearn.metrics import confusion_matrix #ugh
+#     import itertools
+#     import numpy as np
+#     import matplotlib as mpl
+#     import matplotlib.pyplot as plt
+    
+#     # make matrix if tuple passed to matrix:
+#     if isinstance(matrix, tuple):
+#         y_true = matrix[0].copy()
+#         y_pred = matrix[1].copy()
+        
+#         if y_true.ndim>1:
+#             y_true = y_true.argmax(axis=1)
+#         if y_pred.ndim>1:
+#             y_pred = y_pred.argmax(axis=1)
+#         fusion = metrics.confusion_matrix(y_true, y_pred)
+#     else:
+#         fusion = matrix
+    
+#     # INTEGER LABELS
+#     if classes is None:
+#         classes=list(range(len(matrix)))
 
-
+#     #NORMALIZING
+#     # Check if normalize is set to True
+#     # If so, normalize the raw fusion matrix before visualizing
+#     if normalize:
+#         fusion = fusion.astype('float') / fusion.sum(axis=1)[:, np.newaxis]
+#         fmt='.2f'
+#     else:
+#         fmt='d'
     
-    fig, ax = plt.subplots(figsize=(10,10))
-    #mask = np.zeros_like(cm, dtype=np.bool)
-    #idx = np.triu_indices_from(mask)
+#     # PLOT
+#     fig, ax = plt.subplots(figsize=(10,10))
+#     plt.imshow(fusion, cmap=cmap, aspect='equal')
     
-    #mask[idx] = True
-
-    plt.imshow(cm, cmap=cmap, aspect='equal')
+#     # Add title and axis labels 
+#     plt.title(title) 
+#     plt.ylabel('TRUE') 
+#     plt.xlabel('PRED')
     
-    # Add title and axis labels 
-    plt.title('Confusion Matrix') 
-    plt.ylabel('True label') 
-    plt.xlabel('Predicted label')
+#     # Add appropriate axis scales
+#     tick_marks = np.arange(len(classes))
+#     plt.xticks(tick_marks, classes, rotation=45)
+#     plt.yticks(tick_marks, classes)
+#     #ax.set_ylim(len(fusion), -.5,.5) ## <-- This was messing up the plots!
     
-    # Add appropriate axis scales
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
-    #ax.set_ylim(len(cm), -.5,.5)
+#     # Text formatting
+#     fmt = '.2f' if normalize else 'd'
+#     # Add labels to each cell
+#     thresh = fusion.max() / 2.
+#     # iterate thru matrix and append labels  
+#     for i, j in itertools.product(range(fusion.shape[0]), range(fusion.shape[1])):
+#         plt.text(j, i, format(fusion[i, j], fmt),
+#                 horizontalalignment='center',
+#                 color='white' if fusion[i, j] > thresh else 'black',
+#                 size=14, weight='bold')
     
-    # Text formatting
-    fmt = '.2f' if normalize else 'd'
-    # Add labels to each cell
-    thresh = cm.max() / 2.
-    # iterate thru matrix and append labels  
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, format(cm[i, j], fmt),
-                 horizontalalignment='center',
-                 color='darkgray' if cm[i, j] > thresh else 'black',
-                size=14, weight='bold')
-    
-    # Add a legend
-    plt.colorbar()
-    plt.show() 
+#     # Add a legend
+#     plt.colorbar()
+#     plt.show() 
+#     return fusion, fig
 ```
 
-
-```python
-# Plot normalized confusion matrix
-conf1a = plot_confusion_matrix(cm, classes=['No Planet', 'Planet'], normalize=True,
-                      title='Normalized confusion matrix')
-conf1a
-```
-
-
-```python
-# Plot NON normalized confusion matrix
-conf1b = plot_confusion_matrix(cm, classes=['No Planet', 'Planet'], normalize=False,
-                      title='Normalized confusion matrix')
-conf1b
-```
-
-There it is. Our baseline model missed ALL FIVE planets in the test set! It predicted 111 planets in the training set, when we know there were only 37. This is what 80% accuracy gives us. Note the recall score above was 0 - this (as well as F1 and Jaccard, both of which include recall in their calculations) are critical scores for assessing the model. 
+The baseline model only managed to correctly identify 2 planets in the test set, while missing the other 3. The model incorrectly classified 215 non-TCEs as planets. 
 
 ## ROC AUC
 
@@ -2559,266 +2422,598 @@ Plot the ROC area under the curve
 
 
 ```python
-def roc_plots(y_test, y_hat):
-    from sklearn import metrics
-    from sklearn.metrics import roc_curve, roc_auc_score, accuracy_score
-    y_true = (y_test[:, 0] + 0.5).astype("int")   
-    fpr, tpr, thresholds = roc_curve(y_true, y_hat) 
-    fpr, tpr, thresholds = roc_curve(y_true, y_hat)
-
-    # Threshold Cutoff for predictions
-    crossover_index = np.min(np.where(1.-fpr <= tpr))
-    crossover_cutoff = thresholds[crossover_index]
-    crossover_specificity = 1.-fpr[crossover_index]
-    #print("Crossover at {0:.2f} with specificity {1:.2f}".format(crossover_cutoff, crossover_specificity))
-    
-    plt.plot(thresholds, 1.-fpr)
-    plt.plot(thresholds, tpr)
-    plt.title("Crossover at {0:.2f} with specificity {1:.2f}".format(crossover_cutoff, crossover_specificity))
-
-    plt.show()
-
-
-    plt.plot(fpr, tpr)
-    plt.title("ROC area under curve is {0:.2f}".format(roc_auc_score(y_true, y_hat)))
-    plt.show()
-    
-    score = roc_auc_score(y_true,y_hat)
-    print("ROC_AUC SCORE:",score)
-    #print("ROC area under curve is {0:.2f}".format(roc_auc_score(y_true, y_hat)))
+m1_roc = computer.roc_plots(X_test, y_test, m1)
 ```
 
 
+![png](output_86_0.png)
+
+
+
 ```python
-# This 
-roc_plots(y_test, y_hat)
+# view function: roc_plots()
+
+
+# def roc_plots(X,y,model):
+#     from sklearn import metrics
+#     from sklearn.metrics import roc_curve, roc_auc_score, accuracy_score
+
+#     y_true = y.flatten()
+#     y_hat = model.predict(X)
+
+#     fpr, tpr, thresholds = roc_curve(y_true, y_hat) 
+
+#     # Threshold Cutoff for predictions
+#     crossover_index = np.min(np.where(1.-fpr <= tpr))
+#     crossover_cutoff = thresholds[crossover_index]
+#     crossover_specificity = 1.-fpr[crossover_index]
+
+#     fig,axes=plt.subplots(ncols=2, figsize=(15,6))
+#     axes = axes.flatten()
+
+#     ax=axes[0]
+#     ax.plot(thresholds, 1.-fpr)
+#     ax.plot(thresholds, tpr)
+#     ax.set_title("Crossover at {0:.2f}, Specificity {1:.2f}".format(crossover_cutoff, crossover_specificity))
+
+#     ax=axes[1]
+#     ax.plot(fpr, tpr)
+#     ax.set_title("ROC area under curve: {0:.2f}".format(roc_auc_score(y_true, y_hat)))
+#     plt.show()
+    
+#     roc = roc_auc_score(y_true,y_hat)
+
+#     return roc
 ```
 
 # `Model 2`
 
-Revising the function for training the model and tuning just two parameters: adjust learning rate to 4e-3, and increase epochs to 40. 
+Initial parameter tuning: increase learning rate to 3e-4 (0.0003), and increase epochs to 20. 
 
-## Tuning Parameters
-
-This time we will create dictionaries for plugging in parameters to the model. We could do a grid search, or more likely, a randomsearch from sklearn to find the optimal parameters, but for now let's finish building the function to take in the parameter dictionaries with an adjusted learning rate.
+## Build M2
 
 
 ```python
-# set our build function to use the baseline model we built initially
-keras_train = keras_1D(model=Sequential(), kernel_size=11, activation='relu', 
-                           input_shape=x_train.shape[1:], strides=4)
+#### MODEL 2 
+# adjust learning rate to 3e-4
+
+m2 = K.build_cnn(X_train, X_test, y_train, y_test, kernel_size=11, 
+                     activation='relu', input_shape=X_train.shape[1:], 
+                     strides=4, optimizer=Adam, learning_rate=3e-4, 
+                     loss='binary_crossentropy', metrics=['accuracy'])
+```
+
+    BUILDING MODEL...
+    LAYER 1
+    LAYER 2
+    LAYER 3
+    LAYER 4
+    FULL CONNECTION
+    ADDING COST FUNCTION
+    COMPILED
+
+
+## Fit M2
+
+
+```python
+# increase number of epochs to 20
+
+h2 = K.fit_cnn(X_train,y_train, X_test, y_test, m2,
+               validation_data=(X_test, y_test), verbose=2, epochs=20, 
+               steps_per_epoch=(X_train.shape[1]//32), batch_size=32)
+```
+
+    FITTING MODEL...
+    Epoch 1/20
+     - 18s - loss: 0.6963 - accuracy: 0.5792 - val_loss: 0.8951 - val_accuracy: 0.0281
+    Epoch 2/20
+     - 17s - loss: 0.6170 - accuracy: 0.6686 - val_loss: 0.7812 - val_accuracy: 0.3754
+    Epoch 3/20
+     - 18s - loss: 0.5714 - accuracy: 0.7109 - val_loss: 0.5495 - val_accuracy: 0.7912
+    Epoch 4/20
+     - 19s - loss: 0.5186 - accuracy: 0.7468 - val_loss: 0.4270 - val_accuracy: 0.8526
+    Epoch 5/20
+     - 18s - loss: 0.4791 - accuracy: 0.7749 - val_loss: 0.5623 - val_accuracy: 0.7158
+    Epoch 6/20
+     - 21s - loss: 0.4463 - accuracy: 0.8024 - val_loss: 0.4600 - val_accuracy: 0.7754
+    Epoch 7/20
+     - 17s - loss: 0.4060 - accuracy: 0.8210 - val_loss: 0.4943 - val_accuracy: 0.7474
+    Epoch 8/20
+     - 18s - loss: 0.3578 - accuracy: 0.8406 - val_loss: 0.8106 - val_accuracy: 0.5825
+    Epoch 9/20
+     - 17s - loss: 0.3021 - accuracy: 0.8741 - val_loss: 0.5053 - val_accuracy: 0.7351
+    Epoch 10/20
+     - 17s - loss: 0.2565 - accuracy: 0.9003 - val_loss: 1.1649 - val_accuracy: 0.5018
+    Epoch 11/20
+     - 17s - loss: 0.2251 - accuracy: 0.9141 - val_loss: 0.5963 - val_accuracy: 0.7175
+    Epoch 12/20
+     - 18s - loss: 0.1990 - accuracy: 0.9255 - val_loss: 0.3648 - val_accuracy: 0.8561
+    Epoch 13/20
+     - 18s - loss: 0.1801 - accuracy: 0.9321 - val_loss: 0.2194 - val_accuracy: 0.9053
+    Epoch 14/20
+     - 18s - loss: 0.1715 - accuracy: 0.9426 - val_loss: 0.1293 - val_accuracy: 0.9491
+    Epoch 15/20
+     - 17s - loss: 0.1536 - accuracy: 0.9454 - val_loss: 0.1135 - val_accuracy: 0.9702
+    Epoch 16/20
+     - 17s - loss: 0.1700 - accuracy: 0.9372 - val_loss: 0.1084 - val_accuracy: 0.9649
+    Epoch 17/20
+     - 17s - loss: 0.1406 - accuracy: 0.9517 - val_loss: 0.2038 - val_accuracy: 0.9404
+    Epoch 18/20
+     - 18s - loss: 0.1524 - accuracy: 0.9457 - val_loss: 0.1397 - val_accuracy: 0.9579
+    Epoch 19/20
+     - 18s - loss: 0.0919 - accuracy: 0.9665 - val_loss: 0.0927 - val_accuracy: 0.9789
+    Epoch 20/20
+     - 18s - loss: 0.1004 - accuracy: 0.9631 - val_loss: 0.0429 - val_accuracy: 0.9965
+    TRAINING COMPLETE
+    Model: "sequential_2"
+    _________________________________________________________________
+    Layer (type)                 Output Shape              Param #   
+    =================================================================
+    conv1d_5 (Conv1D)            (None, 3187, 8)           184       
+    _________________________________________________________________
+    max_pooling1d_5 (MaxPooling1 (None, 797, 8)            0         
+    _________________________________________________________________
+    batch_normalization_4 (Batch (None, 797, 8)            32        
+    _________________________________________________________________
+    conv1d_6 (Conv1D)            (None, 787, 16)           1424      
+    _________________________________________________________________
+    max_pooling1d_6 (MaxPooling1 (None, 197, 16)           0         
+    _________________________________________________________________
+    batch_normalization_5 (Batch (None, 197, 16)           64        
+    _________________________________________________________________
+    conv1d_7 (Conv1D)            (None, 187, 32)           5664      
+    _________________________________________________________________
+    max_pooling1d_7 (MaxPooling1 (None, 47, 32)            0         
+    _________________________________________________________________
+    batch_normalization_6 (Batch (None, 47, 32)            128       
+    _________________________________________________________________
+    conv1d_8 (Conv1D)            (None, 37, 64)            22592     
+    _________________________________________________________________
+    max_pooling1d_8 (MaxPooling1 (None, 9, 64)             0         
+    _________________________________________________________________
+    flatten_2 (Flatten)          (None, 576)               0         
+    _________________________________________________________________
+    dropout_3 (Dropout)          (None, 576)               0         
+    _________________________________________________________________
+    dense_4 (Dense)              (None, 64)                36928     
+    _________________________________________________________________
+    dropout_4 (Dropout)          (None, 64)                0         
+    _________________________________________________________________
+    dense_5 (Dense)              (None, 64)                4160      
+    _________________________________________________________________
+    dense_6 (Dense)              (None, 1)                 65        
+    =================================================================
+    Total params: 71,241
+    Trainable params: 71,129
+    Non-trainable params: 112
+    _________________________________________________________________
+
+
+## Evaluate M2
+
+The `compute` function combines all the functions used above for calculating the metrics into one shot:
+
+
+```python
+res_m2 = computer.compute(X=X_test, y=y_test, model=m2, hist=h2, preds=True, 
+               summary=False, report=True, fusion=True, 
+               classes=['No Planet','Planet'],roc=True)
 ```
 
 
-```python
-# create params dict for compiling model
-# adjust learning rate to 4e-3
-
-compiler = dict(optimizer=Adam,
-                learning_rate=4e-3,
-                loss='binary_crossentropy',
-                metrics=['accuracy'])
-
-# create dict for fit_generator parameters
-# increase verbose to 2 and number of epochs to 40
-
-params = dict(validation_data = (x_test, y_test), 
-              verbose=2, 
-              epochs=40, 
-              steps_per_epoch=(x_train.shape[1]//32))
-```
-
-## Compile/Fit (M2)
+![png](output_94_0.png)
 
 
-```python
-# MODEL 2
-# using the baseline model as our build model function
 
-m2, h2 = scikit_keras(build_fn=keras_train, compiler=compiler, params=params)
-```
+![png](output_94_1.png)
 
-## Summary (M2)
+
+    
+    
+    ------------------------------------------------------------
+    	CLASSIFICATION REPORT:
+    ------------------------------------------------------------
+                  precision    recall  f1-score   support
+    
+             0.0       1.00      1.00      1.00       565
+             1.0       0.71      1.00      0.83         5
+    
+        accuracy                           1.00       570
+       macro avg       0.86      1.00      0.92       570
+    weighted avg       1.00      1.00      1.00       570
+    
+
+
+
+![png](output_94_3.png)
+
 
 
 ```python
-model.summary()
-```
+# We can retrieve a given metric from the computer's compute function 
+# by accessing any of the given keys from the RES dictionary
 
-## Class Predictions
+# res1.keys()
 
-We then use our trained neural network to classify the test set:
-
-
-```python
-y_pred = model.predict_classes(x_test).flatten()
-```
-
-
-```python
-y_pred
-```
-
-## Validation
-
-Evaluate our model using the same helper functions as before, this time embedded into one single function to handle all the work.
-
-
-```python
-cm = confusion_matrix(y_test, y_pred, labels=[0,1])
-cm
-```
-
-
-```python
-def evaluate_model(x_test, y_test, history=None):
-    
-    # make predictons using test set
-    y_true = (y_test[:, 0] + 0.5).astype("int") # flatten and make integer
-    y_hat = model.predict(x_test)[:,0] 
-    y_pred = model.predict_classes(x_test).flatten() # class predictions 
-    
-    
-    #Plot Model Training Results (PLOT KERAS HISTORY)
-    from sklearn import metrics
-    if y_true.ndim>1:
-        y_true = y_true.argmax(axis=1)
-    if y_pred.ndim>1:
-        y_pred = y_pred.argmax(axis=1)   
-    try:    
-        if history is not None:
-            plot_keras_history(history)
-    except:
-        pass
-    
-    # Print CLASSIFICATION REPORT
-    num_dashes=20
-    print('\n')
-    print('---'*num_dashes)
-    print('\tCLASSIFICATION REPORT:')
-    print('---'*num_dashes)
-#     try:
-#         print(metrics.classification_report(y_true,y_pred))
-         #fig = plot_confusion_matrix((y_true,y_pred))
-#     except Exception as e:
-#         print(f"[!] Error during model evaluation:\n\t{e}")
-
-    from sklearn import metrics
-    report = metrics.classification_report(y_true,y_pred)
-    print(report)
-    
-    # Adding additional metrics not in sklearn's report   
-    from sklearn.metrics import jaccard_score
-    jaccard = jaccard_score(y_test, y_hat_test)
-    print('Jaccard Similarity Score:',jaccard)
-    
-    
-    # CONFUSION MATRIX
-    from sklearn.metrics import confusion_matrix
-    cm = confusion_matrix(y_true, y_pred, labels=[0,1])
-    # Plot normalized confusion matrix
-    fig = plot_confusion_matrix(cm, classes=['No Planet', 'Planet'], 
-                                normalize=False,                               
-                                title='Normalized confusion matrix')
-    plt.show()
-
-    
-    # ROC Area Under Curve
-    roc_plots(y_test, y_hat_test)
-    
-```
-
-
-```python
-evaluate_model(x_test, y_test, h2)
+# res1['model']
+# res1['preds']
+# res1['summary']()
+# res1['FM'][0]
+# res1['FM'][1]
+# res1['ROC']
+#print(res1['report'])
+# res1['jaccard']
+# res1['accuracy']
+# res1['recall']
+#res1['HIST']
 ```
 
 # `MODEL 3`
 
-Another optimizer we can try is SGD instead of Adam - this may produce better outcomes. We will also adjust the learning rate.
+## Build M3
 
 
 ```python
-from keras.optimizers import SGD
+#### MODEL 3
+# increase learning rate to 4e-3
+
+m3 = K.build_cnn(X_train, X_test, y_train, y_test, kernel_size=11, 
+                     activation='relu', input_shape=X_train.shape[1:], 
+                     strides=4, optimizer=Adam, learning_rate=4e-3, 
+                     loss='binary_crossentropy', metrics=['accuracy'])
 ```
+
+    BUILDING MODEL...
+    LAYER 1
+    LAYER 2
+    LAYER 3
+    LAYER 4
+    FULL CONNECTION
+    ADDING COST FUNCTION
+    COMPILED
+
+
+## Train M3
 
 
 ```python
-# create params dict for compiling model
-# adjust learning rate to 4e-3
+# keep number of epochs at 20
 
-compiler = dict(optimizer=SGD,
-                learning_rate=4e-2,
-                loss='binary_crossentropy',
-                metrics=['accuracy'])
-
-# create dict for fit_generator parameters
-# increase verbose to 2 and number of epochs to 40
-
-params = dict(validation_data = (x_test, y_test), 
-              verbose=2, 
-              epochs=40, 
-              steps_per_epoch=(x_train.shape[1]//32))
+h3 = K.fit_cnn(X_train,y_train, X_test, y_test, m3,
+               validation_data=(X_test, y_test), verbose=2, epochs=20, 
+               steps_per_epoch=(X_train.shape[1]//32), batch_size=32)
 ```
+
+    FITTING MODEL...
+    Epoch 1/20
+     - 16s - loss: 0.6168 - accuracy: 0.6840 - val_loss: 0.4940 - val_accuracy: 0.7895
+    Epoch 2/20
+     - 17s - loss: 0.4595 - accuracy: 0.7945 - val_loss: 0.6731 - val_accuracy: 0.5368
+    Epoch 3/20
+     - 18s - loss: 0.4137 - accuracy: 0.8144 - val_loss: 1.5706 - val_accuracy: 0.2702
+    Epoch 4/20
+     - 17s - loss: 0.3486 - accuracy: 0.8554 - val_loss: 1.8025 - val_accuracy: 0.3474
+    Epoch 5/20
+     - 17s - loss: 0.2353 - accuracy: 0.9122 - val_loss: 0.9206 - val_accuracy: 0.6632
+    Epoch 6/20
+     - 17s - loss: 0.3182 - accuracy: 0.8756 - val_loss: 0.1347 - val_accuracy: 0.9579
+    Epoch 7/20
+     - 17s - loss: 0.2137 - accuracy: 0.9160 - val_loss: 0.1280 - val_accuracy: 0.9860
+    Epoch 8/20
+     - 17s - loss: 0.1443 - accuracy: 0.9467 - val_loss: 0.0610 - val_accuracy: 0.9842
+    Epoch 9/20
+     - 17s - loss: 0.0959 - accuracy: 0.9662 - val_loss: 0.0407 - val_accuracy: 0.9965
+    Epoch 10/20
+     - 16s - loss: 0.0912 - accuracy: 0.9719 - val_loss: 0.0475 - val_accuracy: 0.9912
+    Epoch 11/20
+     - 16s - loss: 0.0806 - accuracy: 0.9713 - val_loss: 0.0631 - val_accuracy: 0.9807
+    Epoch 12/20
+     - 17s - loss: 0.0655 - accuracy: 0.9795 - val_loss: 0.0304 - val_accuracy: 0.9982
+    Epoch 13/20
+     - 16s - loss: 0.1022 - accuracy: 0.9700 - val_loss: 0.1527 - val_accuracy: 0.9544
+    Epoch 14/20
+     - 17s - loss: 0.0816 - accuracy: 0.9716 - val_loss: 0.0438 - val_accuracy: 0.9912
+    Epoch 15/20
+     - 16s - loss: 0.0513 - accuracy: 0.9833 - val_loss: 0.1265 - val_accuracy: 0.9614
+    Epoch 16/20
+     - 16s - loss: 0.0499 - accuracy: 0.9826 - val_loss: 0.0382 - val_accuracy: 0.9947
+    Epoch 17/20
+     - 17s - loss: 0.0449 - accuracy: 0.9848 - val_loss: 0.0548 - val_accuracy: 0.9842
+    Epoch 18/20
+     - 17s - loss: 0.0480 - accuracy: 0.9830 - val_loss: 0.0388 - val_accuracy: 0.9912
+    Epoch 19/20
+     - 16s - loss: 0.0433 - accuracy: 0.9886 - val_loss: 0.0425 - val_accuracy: 0.9930
+    Epoch 20/20
+     - 16s - loss: 0.0527 - accuracy: 0.9823 - val_loss: 0.0373 - val_accuracy: 0.9930
+    TRAINING COMPLETE
+    Model: "sequential_4"
+    _________________________________________________________________
+    Layer (type)                 Output Shape              Param #   
+    =================================================================
+    conv1d_13 (Conv1D)           (None, 3187, 8)           184       
+    _________________________________________________________________
+    max_pooling1d_13 (MaxPooling (None, 797, 8)            0         
+    _________________________________________________________________
+    batch_normalization_10 (Batc (None, 797, 8)            32        
+    _________________________________________________________________
+    conv1d_14 (Conv1D)           (None, 787, 16)           1424      
+    _________________________________________________________________
+    max_pooling1d_14 (MaxPooling (None, 197, 16)           0         
+    _________________________________________________________________
+    batch_normalization_11 (Batc (None, 197, 16)           64        
+    _________________________________________________________________
+    conv1d_15 (Conv1D)           (None, 187, 32)           5664      
+    _________________________________________________________________
+    max_pooling1d_15 (MaxPooling (None, 47, 32)            0         
+    _________________________________________________________________
+    batch_normalization_12 (Batc (None, 47, 32)            128       
+    _________________________________________________________________
+    conv1d_16 (Conv1D)           (None, 37, 64)            22592     
+    _________________________________________________________________
+    max_pooling1d_16 (MaxPooling (None, 9, 64)             0         
+    _________________________________________________________________
+    flatten_4 (Flatten)          (None, 576)               0         
+    _________________________________________________________________
+    dropout_7 (Dropout)          (None, 576)               0         
+    _________________________________________________________________
+    dense_10 (Dense)             (None, 64)                36928     
+    _________________________________________________________________
+    dropout_8 (Dropout)          (None, 64)                0         
+    _________________________________________________________________
+    dense_11 (Dense)             (None, 64)                4160      
+    _________________________________________________________________
+    dense_12 (Dense)             (None, 1)                 65        
+    =================================================================
+    Total params: 71,241
+    Trainable params: 71,129
+    Non-trainable params: 112
+    _________________________________________________________________
+
+
+## Evaluate M3
 
 
 ```python
-# MODEL 3: using the baseline model as our build model function
-
-m3, h3 = scikit_keras(build_fn=keras_train, compiler=compiler, params=params)
+res_m3 = computer.compute(X=X_test, y=y_test, model=m3, hist=h3, preds=True, 
+               summary=False, report=True, fusion=True, 
+               classes=['No Planet','Planet'],roc=True)
 ```
 
 
-```python
-cm = confusion_matrix(y_true, y_pred, labels=[0,1])
-cm
-```
+![png](output_102_0.png)
 
 
-```python
-evaluate_model(x_test, y_test, h3)
-```
+
+![png](output_102_1.png)
+
+
+    
+    
+    ------------------------------------------------------------
+    	CLASSIFICATION REPORT:
+    ------------------------------------------------------------
+                  precision    recall  f1-score   support
+    
+             0.0       1.00      0.99      1.00       565
+             1.0       0.56      1.00      0.71         5
+    
+        accuracy                           0.99       570
+       macro avg       0.78      1.00      0.86       570
+    weighted avg       1.00      0.99      0.99       570
+    
+
+
+
+![png](output_102_3.png)
+
+
+It appears that increasing the learning rate did not help to improve the model's performance. While it still identified all 5 planets, it misclassified 4 non-planets as planets, two more than model 2. Let's see if we can decrease the False Positive Rate, while Maintaining the False Negative Rate at zero. We'll go back to Model 2's original learning rate of 3e-4, this time increasing the number of epochs instead.
 
 # `MODEL 4`
 
+## Build M4
+
 
 ```python
-# create params dict for compiling model
-# adjust learning rate to 4e-3
+#### MODEL 4
+# decrease learning rate back to 3e-4
 
-compiler = dict(optimizer=SGD,
-                learning_rate=4e-2,
-                loss='binary_crossentropy',
-                metrics=['accuracy'])
+m4 = K.build_cnn(X_train, X_test, y_train, y_test, kernel_size=11, 
+                     activation='relu', input_shape=X_train.shape[1:], 
+                     strides=4, optimizer=Adam, learning_rate=3e-4, 
+                     loss='binary_crossentropy', metrics=['accuracy'])
+```
 
-# create dict for fit_generator parameters
-# increase verbose to 2 and number of epochs to 40
+    BUILDING MODEL...
+    LAYER 1
+    LAYER 2
+    LAYER 3
+    LAYER 4
+    FULL CONNECTION
+    ADDING COST FUNCTION
+    COMPILED
 
-params = dict(validation_data = (x_test, y_test), 
-              verbose=2, 
-              epochs=40, 
-              steps_per_epoch=(x_train.shape[1]/23))
 
-# MODEL 4
-# using the baseline model as our build model function
+## Fit M4
 
-m4, h4 = scikit_keras(build_fn=keras_train, compiler=compiler, params=params, 
-                      batch_size=23)
+
+```python
+# increase number of epochs to 33
+
+h4 = K.fit_cnn(X_train,y_train, X_test, y_test, m4,
+               validation_data=(X_test, y_test), verbose=2, epochs=33, 
+               steps_per_epoch=(X_train.shape[1]//32), batch_size=32)
+```
+
+    FITTING MODEL...
+    Epoch 1/33
+     - 17s - loss: 0.7066 - accuracy: 0.5758 - val_loss: 0.6493 - val_accuracy: 0.7035
+    Epoch 2/33
+     - 18s - loss: 0.6380 - accuracy: 0.6417 - val_loss: 0.5416 - val_accuracy: 0.8491
+    Epoch 3/33
+     - 19s - loss: 0.5928 - accuracy: 0.6869 - val_loss: 0.4485 - val_accuracy: 0.8561
+    Epoch 4/33
+     - 18s - loss: 0.5355 - accuracy: 0.7326 - val_loss: 0.4015 - val_accuracy: 0.8263
+    Epoch 5/33
+     - 18s - loss: 0.4855 - accuracy: 0.7607 - val_loss: 0.4423 - val_accuracy: 0.7912
+    Epoch 6/33
+     - 18s - loss: 0.4230 - accuracy: 0.8059 - val_loss: 0.3697 - val_accuracy: 0.8175
+    Epoch 7/33
+     - 17s - loss: 0.3168 - accuracy: 0.8636 - val_loss: 0.3396 - val_accuracy: 0.8386
+    Epoch 8/33
+     - 17s - loss: 0.2921 - accuracy: 0.8804 - val_loss: 0.1984 - val_accuracy: 0.8825
+    Epoch 9/33
+     - 17s - loss: 0.2371 - accuracy: 0.9006 - val_loss: 0.1593 - val_accuracy: 0.9298
+    Epoch 10/33
+     - 18s - loss: 0.2315 - accuracy: 0.9110 - val_loss: 0.2077 - val_accuracy: 0.9035
+    Epoch 11/33
+     - 17s - loss: 0.1909 - accuracy: 0.9271 - val_loss: 0.2982 - val_accuracy: 0.8807
+    Epoch 12/33
+     - 18s - loss: 0.1944 - accuracy: 0.9296 - val_loss: 0.1362 - val_accuracy: 0.9491
+    Epoch 13/33
+     - 18s - loss: 0.1673 - accuracy: 0.9378 - val_loss: 0.2298 - val_accuracy: 0.9175
+    Epoch 14/33
+     - 18s - loss: 0.1366 - accuracy: 0.9533 - val_loss: 0.1078 - val_accuracy: 0.9667
+    Epoch 15/33
+     - 18s - loss: 0.1530 - accuracy: 0.9460 - val_loss: 0.0975 - val_accuracy: 0.9632
+    Epoch 16/33
+     - 18s - loss: 0.1140 - accuracy: 0.9580 - val_loss: 0.0970 - val_accuracy: 0.9667
+    Epoch 17/33
+     - 18s - loss: 0.1071 - accuracy: 0.9631 - val_loss: 0.1246 - val_accuracy: 0.9614
+    Epoch 18/33
+     - 18s - loss: 0.1230 - accuracy: 0.9586 - val_loss: 0.1308 - val_accuracy: 0.9632
+    Epoch 19/33
+     - 18s - loss: 0.1272 - accuracy: 0.9514 - val_loss: 0.0802 - val_accuracy: 0.9789
+    Epoch 20/33
+     - 18s - loss: 0.0997 - accuracy: 0.9650 - val_loss: 0.0773 - val_accuracy: 0.9737
+    Epoch 21/33
+     - 17s - loss: 0.1017 - accuracy: 0.9621 - val_loss: 0.0756 - val_accuracy: 0.9825
+    Epoch 22/33
+     - 18s - loss: 0.1312 - accuracy: 0.9558 - val_loss: 0.0570 - val_accuracy: 0.9807
+    Epoch 23/33
+     - 18s - loss: 0.1018 - accuracy: 0.9659 - val_loss: 0.0707 - val_accuracy: 0.9825
+    Epoch 24/33
+     - 17s - loss: 0.0885 - accuracy: 0.9697 - val_loss: 0.0555 - val_accuracy: 0.9877
+    Epoch 25/33
+     - 18s - loss: 0.0836 - accuracy: 0.9700 - val_loss: 0.0570 - val_accuracy: 0.9895
+    Epoch 26/33
+     - 18s - loss: 0.0628 - accuracy: 0.9789 - val_loss: 0.0591 - val_accuracy: 0.9895
+    Epoch 27/33
+     - 17s - loss: 0.0737 - accuracy: 0.9747 - val_loss: 0.0645 - val_accuracy: 0.9842
+    Epoch 28/33
+     - 17s - loss: 0.0710 - accuracy: 0.9757 - val_loss: 0.0722 - val_accuracy: 0.9842
+    Epoch 29/33
+     - 17s - loss: 0.0704 - accuracy: 0.9773 - val_loss: 0.0597 - val_accuracy: 0.9842
+    Epoch 30/33
+     - 17s - loss: 0.0596 - accuracy: 0.9823 - val_loss: 0.0940 - val_accuracy: 0.9772
+    Epoch 31/33
+     - 19s - loss: 0.0540 - accuracy: 0.9833 - val_loss: 0.0795 - val_accuracy: 0.9807
+    Epoch 32/33
+     - 17s - loss: 0.0616 - accuracy: 0.9782 - val_loss: 0.1153 - val_accuracy: 0.9667
+    Epoch 33/33
+     - 17s - loss: 0.0618 - accuracy: 0.9817 - val_loss: 0.1042 - val_accuracy: 0.9702
+    TRAINING COMPLETE
+    Model: "sequential_5"
+    _________________________________________________________________
+    Layer (type)                 Output Shape              Param #   
+    =================================================================
+    conv1d_17 (Conv1D)           (None, 3187, 8)           184       
+    _________________________________________________________________
+    max_pooling1d_17 (MaxPooling (None, 797, 8)            0         
+    _________________________________________________________________
+    batch_normalization_13 (Batc (None, 797, 8)            32        
+    _________________________________________________________________
+    conv1d_18 (Conv1D)           (None, 787, 16)           1424      
+    _________________________________________________________________
+    max_pooling1d_18 (MaxPooling (None, 197, 16)           0         
+    _________________________________________________________________
+    batch_normalization_14 (Batc (None, 197, 16)           64        
+    _________________________________________________________________
+    conv1d_19 (Conv1D)           (None, 187, 32)           5664      
+    _________________________________________________________________
+    max_pooling1d_19 (MaxPooling (None, 47, 32)            0         
+    _________________________________________________________________
+    batch_normalization_15 (Batc (None, 47, 32)            128       
+    _________________________________________________________________
+    conv1d_20 (Conv1D)           (None, 37, 64)            22592     
+    _________________________________________________________________
+    max_pooling1d_20 (MaxPooling (None, 9, 64)             0         
+    _________________________________________________________________
+    flatten_5 (Flatten)          (None, 576)               0         
+    _________________________________________________________________
+    dropout_9 (Dropout)          (None, 576)               0         
+    _________________________________________________________________
+    dense_13 (Dense)             (None, 64)                36928     
+    _________________________________________________________________
+    dropout_10 (Dropout)         (None, 64)                0         
+    _________________________________________________________________
+    dense_14 (Dense)             (None, 64)                4160      
+    _________________________________________________________________
+    dense_15 (Dense)             (None, 1)                 65        
+    =================================================================
+    Total params: 71,241
+    Trainable params: 71,129
+    Non-trainable params: 112
+    _________________________________________________________________
+
+
+## Evaluate M4
+
+
+```python
+res_m4 = computer.compute(X=X_test, y=y_test, model=m4, hist=h4, preds=True, 
+               summary=False, report=True, fusion=True, 
+               classes=['No Planet','Planet'],roc=True)
+```
+
+
+![png](output_110_0.png)
+
+
+
+![png](output_110_1.png)
+
+
+    
+    
+    ------------------------------------------------------------
+    	CLASSIFICATION REPORT:
+    ------------------------------------------------------------
+                  precision    recall  f1-score   support
+    
+             0.0       1.00      0.97      0.98       565
+             1.0       0.23      1.00      0.37         5
+    
+        accuracy                           0.97       570
+       macro avg       0.61      0.98      0.68       570
+    weighted avg       0.99      0.97      0.98       570
+    
+
+
+
+![png](output_110_3.png)
+
+
+
+```python
+# %mkdir models
+m2.save_weights('models/k2_cnn1d.h5')
 ```
 
 # Interpret Results
 
 ## Conclusion
 
-Above, we were able to identify with 99% accuracy 3 of 5 stars that have an exoplanet in their orbit. 
+Above, we were able to identify with 99% accuracy 5 of 5 stars with an orbiting exoplanet (or exoplanets). The best model (MODEL 2) incorrectly predicted just 2 False Positives, with ZERO false negatives. 
 
 # Recommendations
 
-While it is possible to create a fairly accurate model for detecting exoplanets using the raw flux values of an imbalanced data set (imbalanced meaning only a few positive examples in a sea of negatives) - it is clear that important information is misclassified. When it comes to astrophysics, we need to be much more accurate than this, and we need to feel like the model is fully reliable. I cannot conclude that this model is adequately reliable for performing an accurate analysis on this type of data.
+While it is possible to create a near-perfect classification model for detecting exoplanets using the raw flux values of an imbalanced data set, the model would benefit from further validation using additional data from either K2 or another telescope such as TESS. One issue with this model is that it doesn't reveal how it makes the decision on each prediction, an insight that would be extremely useful for astrophysicists and for developing and improving the model itself. A better, more robust and useful model, therefore, would be one which gives such insight without sacrificing accuracy or recall. 
 
 My recommendations are the following:
 
-   1. Use datasets from the MAST website (via API) to incorporate other calculations of the star's properties as features to be used for classification algorithms. Furthermore, attempt other types of transformations and normalizations on the data before running the model - for instance, apply a Fourier transform.
+   1. Use datasets from the MAST website (via API) to incorporate other calculations of the star's properties as features to be used for classification algorithms. Furthermore, attempt other types of transformations and normalizations on the data before running the model - for instance, apply Fourier transform and phase folding.
 
    2. Combine data from multiple campaigns and perhaps even multiple telescopes (for instance, matching sky coordinates and time intervals between K2, Kepler, and TESS for a batch of stars that have overlapping observations - this would be critical for finding transit periods that are longer than the campaigns of a single telecope's observation period).
 
@@ -2828,7 +3023,6 @@ My recommendations are the following:
 
 # Future Work
 
-To continue this project, I'll take another approach for detecting exoplanets using computer vision to analyze images of spectographs of this same star flux data set. Please go to the notebook `[starskøpe-2]` to see how I use a Restricted Boltzmann Machines neural network model to classify stars as exoplanet hosts using spectograph images of the flux values to find transiting exoplanets. Following this, I will apply the same algorithm to spectographs of Fourier transformed data, as you will see in `[starskøpe-3]`. 
+To continue this project, I'll take another approach for detecting exoplanets using computer vision to analyze images of spectographs of this same star flux data set. In part II (notebook `[starskøpe-2]`) I use Restricted Boltzmann Machines on Fourier-transformed spectograph images of the Flux data for K2. These are then stacked on top of each other as layers in a Deep Boltzmann Machine neural network. In part III (notebook `[starskøpe-3]`) I will apply a similar technique using data from TESS.
 
-Additional future work following this project will be to develop my "cyberoptic artificial telescope" as a machine learning driven application that any astrophysicist can use to look at a single or collection of stars and have the model classify them according not only to exoplanet predictions, but also predict what type of star it is, and other key properties that would be of interest for astrophysical science applications.
-
+For triage/vetting purposes, this model could be useful for scientists. However, I would like to extend the model's capability using a multiclassification algorithm that can tell us not only if there is a transiting body, but how many, as well as additional information about the star's properties. The latter could be done by training another model on stellar parameters, and then stacking the two together into one neural network.

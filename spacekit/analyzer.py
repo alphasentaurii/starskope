@@ -1,7 +1,7 @@
 
 # ********* starskøpe.Spacekit.signal ********* #
 """
-signal
+analyzer
 helper functions for signal and wave analysis  
 
 """
