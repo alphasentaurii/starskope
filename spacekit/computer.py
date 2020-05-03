@@ -1,35 +1,37 @@
 
-# ********* starskøpe.spacekit.metriks ********* #
-""" 
-helper functions for generating predictions, 
+# ********* starskøpe.spacekit.computer ********* #
+"""Helper functions for generating predictions, 
 calculating scores, and evaluating a machine learning model.
 
-TODO       
-- save metriks to textfile/pickle objs and/or dictionaries
-
-
-
-"""
 # -----------------
 # STATIC CLASS METHODS 
 # -----------------
 # * predictions 
 #   get_preds()
+#   fnfp()
 #
 # * Plots
 #   keras_history()
 #   plot_confusion_matrix()
 #   roc_plots()
+#
+# * All-in-One-Shot
+#   compute() 
+#
+#
+TODO       
+- save metriks to textfile/pickle objs and/or dictionaries
+#
 # ********* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ ********* #
-
+"""
 import pandas as pd
 import numpy as np
 import itertools
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from sklearn import metrics
-from sklearn.metrics import accuracy_score, recall_score, confusion_matrix, roc_curve, roc_auc_score, accuracy_score, jaccard_score
-from sklearn.metrics import confusion_matrix #ugh
+from sklearn.metrics import accuracy_score, recall_score, roc_auc_score, jaccard_score, fowlkes_mallows_score
+from sklearn.metrics import confusion_matrix, roc_curve
 
 
 
@@ -105,7 +107,7 @@ def keras_history(history, figsize=(10,4)):
 
  # FUSION_MATRIX()
     
-def fusion_matrix(matrix, classes=None, normalize=False, title='Fusion Matrix', cmap='Blues',
+def fusion_matrix(matrix, classes=None, normalize=True, title='Fusion Matrix', cmap='Blues',
     print_raw=False): 
     """
     FUSION MATRIX!
@@ -144,9 +146,11 @@ def fusion_matrix(matrix, classes=None, normalize=False, title='Fusion Matrix', 
     # If so, normalize the raw fusion matrix before visualizing
     if normalize:
         fusion = fusion.astype('float') / fusion.sum(axis=1)[:, np.newaxis]
+        thresh = 0.5
         fmt='.2f'
     else:
         fmt='d'
+        thresh = fusion.max() / 2.
     
     # PLOT
     fig, ax = plt.subplots(figsize=(10,10))
@@ -166,7 +170,7 @@ def fusion_matrix(matrix, classes=None, normalize=False, title='Fusion Matrix', 
     # Text formatting
     fmt = '.2f' if normalize else 'd'
     # Add labels to each cell
-    thresh = fusion.max() / 2.
+    #thresh = fusion.max() / 2.
     # iterate thru matrix and append labels  
     for i, j in itertools.product(range(fusion.shape[0]), range(fusion.shape[1])):
         plt.text(j, i, format(fusion[i, j], fmt),
@@ -182,6 +186,16 @@ def fusion_matrix(matrix, classes=None, normalize=False, title='Fusion Matrix', 
 
 
 def roc_plots(X,y,model):
+    """Calculates ROC_AUC score and plots Receiver Operator Characteristics (ROC)
+
+    Arguments:
+        X {feature set} -- typically X_test
+        y {labels} -- typically y_test
+        model {classifier} -- the model name for which you are calculting roc score
+
+    Returns:
+        roc -- roc_auc_score (via sklearn)
+    """
     from sklearn import metrics
     from sklearn.metrics import roc_curve, roc_auc_score, accuracy_score
 

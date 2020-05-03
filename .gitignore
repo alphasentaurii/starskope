@@ -1,6 +1,7 @@
 .ipynb_checkpoints
 .DS_Store
 __pycache__
+__MACOSX
 *.db
 *.pytest_cache
 *.json
@@ -8,8 +9,6 @@ __pycache__
 *.tfevents
 *.fits
 *.csv
-images/*
-*.png
 .learn
 Icon?
 

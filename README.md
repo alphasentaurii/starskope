@@ -1,22 +1,23 @@
 
 # `STARSKØPE`
 
-
-
 **Building a Cyberoptic Artificial Telescope for Astrophysical Object Classification**
 
 > Flatiron School Capstone Project
 * `Author: Ru Keïn`
+* `Date: 4.7.2020`
 * `Instructor: James Irving PhD`
 * `Data Science Full-Time Program`
-* `Blog post:` http://www.hakkeray.com/datascience/2020/03/22/planetX-hunter-classification-algorithms.html
+* `Blog post:` http://www.hakkeray.com/datascience/2020/04/01/starskope-cyberoptic-artificial-telescope.html
 * `Non-Technical Presentation`: Datascience-CAPSTONE-starskope.pdf
 
     Note: this project is divided into 3 notebooks:
 
-    starskøpe I : Binary Classification of K2 Timeseries Photometry Data using a Convolutional Neural Network (CNN)
-    starskøpe II: Autoencoding Restricted Boltzmann Machines for Image Classification of Raw Spectographs
-    starskøpe III: Stacking RBMs into single robust Deep Boltzmann Machine
+    starskøpe : Binary Classification of K2 Timeseries Photometry Data using a Convolutional Neural Network
+    starskøpe-2:  Image Classification of Spectrographs using Keras CNN
+    starskøpe-3: Stacking autoencoded RBMs into single robust Deep Boltzmann Machine
+
+[transiting-planet]("https://github.com/hakkeray/starskope/blob/master/288_planetbleed1600.jpeg")
 
 # Mission Brief
 
@@ -96,41 +97,41 @@ from fsds_100719.imports import *
 
 
 <style  type="text/css" >
-</style><table id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfaded" ><caption>Loaded Packages and Handles</caption><thead>    <tr>        <th class="col_heading level0 col0" >Handle</th>        <th class="col_heading level0 col1" >Package</th>        <th class="col_heading level0 col2" >Description</th>    </tr></thead><tbody>
+</style><table id="T_56889908_8d6f_11ea_b585_14109fdfaded" ><caption>Loaded Packages and Handles</caption><thead>    <tr>        <th class="col_heading level0 col0" >Handle</th>        <th class="col_heading level0 col1" >Package</th>        <th class="col_heading level0 col2" >Description</th>    </tr></thead><tbody>
                 <tr>
-                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow0_col0" class="data row0 col0" >dp</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow0_col1" class="data row0 col1" >IPython.display</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow0_col2" class="data row0 col2" >Display modules with helpful display and clearing commands.</td>
+                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow0_col0" class="data row0 col0" >dp</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow0_col1" class="data row0 col1" >IPython.display</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow0_col2" class="data row0 col2" >Display modules with helpful display and clearing commands.</td>
             </tr>
             <tr>
-                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow1_col0" class="data row1 col0" >fs</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow1_col1" class="data row1 col1" >fsds_100719</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow1_col2" class="data row1 col2" >Custom data science bootcamp student package</td>
+                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow1_col0" class="data row1 col0" >fs</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow1_col1" class="data row1 col1" >fsds_100719</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow1_col2" class="data row1 col2" >Custom data science bootcamp student package</td>
             </tr>
             <tr>
-                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow2_col0" class="data row2 col0" >mpl</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow2_col1" class="data row2 col1" >matplotlib</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow2_col2" class="data row2 col2" >Matplotlib's base OOP module with formatting artists</td>
+                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow2_col0" class="data row2 col0" >mpl</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow2_col1" class="data row2 col1" >matplotlib</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow2_col2" class="data row2 col2" >Matplotlib's base OOP module with formatting artists</td>
             </tr>
             <tr>
-                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow3_col0" class="data row3 col0" >plt</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow3_col1" class="data row3 col1" >matplotlib.pyplot</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow3_col2" class="data row3 col2" >Matplotlib's matlab-like plotting module</td>
+                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow3_col0" class="data row3 col0" >plt</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow3_col1" class="data row3 col1" >matplotlib.pyplot</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow3_col2" class="data row3 col2" >Matplotlib's matlab-like plotting module</td>
             </tr>
             <tr>
-                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow4_col0" class="data row4 col0" >np</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow4_col1" class="data row4 col1" >numpy</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow4_col2" class="data row4 col2" >scientific computing with Python</td>
+                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow4_col0" class="data row4 col0" >np</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow4_col1" class="data row4 col1" >numpy</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow4_col2" class="data row4 col2" >scientific computing with Python</td>
             </tr>
             <tr>
-                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow5_col0" class="data row5 col0" >pd</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow5_col1" class="data row5 col1" >pandas</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow5_col2" class="data row5 col2" >High performance data structures and tools</td>
+                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow5_col0" class="data row5 col0" >pd</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow5_col1" class="data row5 col1" >pandas</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow5_col2" class="data row5 col2" >High performance data structures and tools</td>
             </tr>
             <tr>
-                                <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow6_col0" class="data row6 col0" >sns</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow6_col1" class="data row6 col1" >seaborn</td>
-                        <td id="T_3e6f7e8e_8b5f_11ea_94cd_14109fdfadedrow6_col2" class="data row6 col2" >High-level data visualization library based on matplotlib</td>
+                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow6_col0" class="data row6 col0" >sns</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow6_col1" class="data row6 col1" >seaborn</td>
+                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow6_col2" class="data row6 col2" >High-level data visualization library based on matplotlib</td>
             </tr>
     </tbody></table>
 
@@ -222,6 +223,12 @@ import spacekit
 from spacekit import analyzer,transformer,builder,computer
 ```
 
+
+```python
+%load_ext autoreload
+%autoreload 2
+```
+
 Import dataset which has already been split into train and test sets, `exoTrain.csv.zip` and `exoTest.csv.zip` (I compressed them from their original csv format since the training set is > 240 MB so we'll to unzip them).
 
 
@@ -300,9 +307,10 @@ display(train['LABEL'].value_counts(),test['LABEL'].value_counts())
 display(train.head(), test.head())
 ```
 
-
+<html>
+<body>
 <div>
-<style scoped>
+<style>
     .dataframe tbody tr th:only-of-type {
         vertical-align: middle;
     }
@@ -843,7 +851,7 @@ display(train.head(), test.head())
 
 
 <div>
-<style scoped>
+<style>
     .dataframe tbody tr th:only-of-type {
         vertical-align: middle;
     }
@@ -1380,7 +1388,8 @@ display(train.head(), test.head())
 </table>
 <p>5 rows × 3198 columns</p>
 </div>
-
+</body>
+</html>
 
 Our target column `LABEL` assigns each star with a 1 or a 2 to designate whether or not there is a confirmed exoplanet that was found in the star's orbit. This is precisely what we are trying to classify in our model below.
 
@@ -1576,23 +1585,18 @@ Flux.atomic_vector_plotter(signal=tce2, label_col='LABEL', classes=[1,2],
 ```
 
 
-![png](output_31_0.png)
+![png](outputs/output_32_0.png)
 
 
 
-![png](output_31_1.png)
+![png](outputs/output_32_1.png)
+
+![png](outputs/output_32_2.png)
 
 
-
-![png](output_31_2.png)
-
-
-
-![png](output_31_3.png)
-
+![png](outputs/output_32_3.png)
 
 This second star's flux signal pattern looks very different - are we to assume that each one of those dips is a transit event? Perhaps more than one planet is orbiting? Otherwise that would be a fairly short period. Let's compare these to the NON planet host stars:
-
 
 ```python
 Flux.atomic_vector_plotter(signal=no_tce1, label_col='LABEL', classes=[1,2],
@@ -1605,19 +1609,19 @@ Flux.atomic_vector_plotter(signal=no_tce2, label_col='LABEL', classes=[1,2],
 ```
 
 
-![png](output_33_0.png)
+![png](outputs/output_34_0.png)
 
 
 
-![png](output_33_1.png)
+![png](outputs/output_34_1.png)
 
 
 
-![png](output_33_2.png)
+![png](outputs/output_34_2.png)
 
 
 
-![png](output_33_3.png)
+![png](outputs/output_34_3.png)
 
 
 It's hard to make a fair comparison with these plots without being able to see much in detail. We need to "zoom in" - this can be accomplished through normalizing and scaling techniques, but the standard procedure for this type of data would be to perform phase-folding based on the estimated period of the transiting planets.
@@ -1629,18 +1633,6 @@ It's hard to make a fair comparison with these plots without being able to see m
 from spacekit.transformer import Transformer
 T = transformer.Transformer()
 ```
-
-
-```python
-X_train,X_test,y_train,y_test = T.hypersonic_pliers(DATA+'/exoTrain.csv', 
-                                          DATA+'/exoTest.csv') 
-```
-
-    X_train:  (5087, 3197)
-    y_train:  (5087, 1)
-    X_test:  (570, 3197)
-    y_test:  (570, 1)
-
 
 
 ```python
@@ -1677,21 +1669,21 @@ X_train,X_test,y_train,y_test = T.hypersonic_pliers(DATA+'/exoTrain.csv',
 #         return X_train, X_test, y_train, y_test
 ```
 
+
+```python
+X_train,X_test,y_train,y_test = T.hypersonic_pliers(DATA+'/exoTrain.csv', 
+                                          DATA+'/exoTest.csv') 
+```
+
+    X_train:  (5087, 3197)
+    y_train:  (5087, 1)
+    X_test:  (570, 3197)
+    y_test:  (570, 1)
+
+
 ## Scaling
 
 Scale each observation to zero mean and unit variance.
-
-
-```python
-# Scale each row to zero mean and unit variance.
-X_train, X_test = T.thermo_fusion_chisel(X_train, X_test)
-```
-
-    Mean:  0.0
-    Variance:  1.0
-    Mean:  2.6670356049800446e-17
-    Variance:  1.0
-
 
 
 ```python
@@ -1726,6 +1718,18 @@ X_train, X_test = T.thermo_fusion_chisel(X_train, X_test)
 #                 return matrix1
 ```
 
+
+```python
+# Scale each row to zero mean and unit variance.
+X_train, X_test = T.thermo_fusion_chisel(X_train, X_test)
+```
+
+    Mean:  0.0
+    Variance:  1.0
+    Mean:  2.6670356049800446e-17
+    Variance:  1.0
+
+
 ## De-noising
 
 In order to reduce the amount of high frequency noise that is likely to have an adverse effect on the neural network's learning outcomes, we can pass a uniform 1-D filter on our scaled train and test data then stack the arrays along the second axis. There are other techniques we might want to apply for further de-noising but for now we'll start with this for the baseline.
@@ -1738,16 +1742,6 @@ print(y_train.shape)
 
     (5087, 3197)
     (5087, 1)
-
-
-
-```python
-# we now have a 2-dimensional array for every star
-X_train, X_test = T.babel_fish_dispenser(X_train, X_test, step_size=200, 
-                                         axis=2)
-```
-
-    (5087, 3197, 2) (570, 3197, 2)
 
 
 
@@ -1791,6 +1785,16 @@ X_train, X_test = T.babel_fish_dispenser(X_train, X_test, step_size=200,
 
 
 ```python
+# we now have a 2-dimensional array for every star
+X_train, X_test = T.babel_fish_dispenser(X_train, X_test, step_size=200, 
+                                         axis=2)
+```
+
+    (5087, 3197, 2) (570, 3197, 2)
+
+
+
+```python
 # array on 2nd axis
 print('\nx_train[-1] flux signal rolling avgs\n')
 # plot arrays
@@ -1809,12 +1813,12 @@ plt.plot(rolling)
 
 
 
-    [<matplotlib.lines.Line2D at 0x1c3fe612d0>]
+    [<matplotlib.lines.Line2D at 0x1c428bf210>]
 
 
 
 
-![png](output_47_2.png)
+![png](outputs/output_48_2.png)
 
 
 
@@ -1827,12 +1831,12 @@ plt.plot(rolling)
 
 
 
-    [<matplotlib.lines.Line2D at 0x1c3f932890>]
+    [<matplotlib.lines.Line2D at 0x1c42a8f2d0>]
 
 
 
 
-![png](output_48_1.png)
+![png](outputs/output_49_1.png)
 
 
 # Model
@@ -1892,24 +1896,6 @@ y_train.shape
 from spacekit.builder import Keras
 K = builder.Keras()
 ```
-
-
-```python
-m1 = K.build_cnn(X_train, X_test, y_train, y_test, kernel_size=11, 
-                     activation='relu', input_shape=X_train.shape[1:], 
-                     strides=4, optimizer=Adam, learning_rate=1e-5, 
-                     loss='binary_crossentropy', metrics=['accuracy'])
-```
-
-    BUILDING MODEL...
-    LAYER 1
-    LAYER 2
-    LAYER 3
-    LAYER 4
-    FULL CONNECTION
-    ADDING COST FUNCTION
-    COMPILED
-
 
 
 ```python
@@ -1993,72 +1979,27 @@ m1 = K.build_cnn(X_train, X_test, y_train, y_test, kernel_size=11,
 #     return model 
 ```
 
+
+```python
+m1 = K.build_cnn(X_train, X_test, y_train, y_test, kernel_size=11, 
+                     activation='relu', input_shape=X_train.shape[1:], 
+                     strides=4, optimizer=Adam, learning_rate=1e-5, 
+                     loss='binary_crossentropy', metrics=['accuracy'])
+```
+
+    BUILDING MODEL...
+    LAYER 1
+    LAYER 2
+    LAYER 3
+    LAYER 4
+    FULL CONNECTION
+    ADDING COST FUNCTION
+    COMPILED
+
+
 ## Batch Generator
 
 To correct for the extremely unbalanced dataset, we'll ensure that the network sees 50% of the positive sample over each batch. We will also apply augmentation by rotating each of the samples randomly each time, thus generating new data. This is similar to image classification when we rotate or shift the samples each time.
-
-
-```python
-h1 = K.fit_cnn(X_train,y_train, X_test, y_test, m1,
-               validation_data=(X_test, y_test), verbose=2, epochs=5, 
-               steps_per_epoch=(X_train.shape[1]//32), batch_size=32)
-```
-
-    FITTING MODEL...
-    Epoch 1/5
-     - 18s - loss: 0.7967 - accuracy: 0.5009 - val_loss: 0.6152 - val_accuracy: 0.9351
-    Epoch 2/5
-     - 17s - loss: 0.7547 - accuracy: 0.5098 - val_loss: 0.6105 - val_accuracy: 0.8509
-    Epoch 3/5
-     - 18s - loss: 0.7194 - accuracy: 0.5363 - val_loss: 0.6260 - val_accuracy: 0.7351
-    Epoch 4/5
-     - 17s - loss: 0.7406 - accuracy: 0.5107 - val_loss: 0.6455 - val_accuracy: 0.6509
-    Epoch 5/5
-     - 18s - loss: 0.7250 - accuracy: 0.5183 - val_loss: 0.6552 - val_accuracy: 0.6193
-    TRAINING COMPLETE
-    Model: "sequential_1"
-    _________________________________________________________________
-    Layer (type)                 Output Shape              Param #   
-    =================================================================
-    conv1d_1 (Conv1D)            (None, 3187, 8)           184       
-    _________________________________________________________________
-    max_pooling1d_1 (MaxPooling1 (None, 797, 8)            0         
-    _________________________________________________________________
-    batch_normalization_1 (Batch (None, 797, 8)            32        
-    _________________________________________________________________
-    conv1d_2 (Conv1D)            (None, 787, 16)           1424      
-    _________________________________________________________________
-    max_pooling1d_2 (MaxPooling1 (None, 197, 16)           0         
-    _________________________________________________________________
-    batch_normalization_2 (Batch (None, 197, 16)           64        
-    _________________________________________________________________
-    conv1d_3 (Conv1D)            (None, 187, 32)           5664      
-    _________________________________________________________________
-    max_pooling1d_3 (MaxPooling1 (None, 47, 32)            0         
-    _________________________________________________________________
-    batch_normalization_3 (Batch (None, 47, 32)            128       
-    _________________________________________________________________
-    conv1d_4 (Conv1D)            (None, 37, 64)            22592     
-    _________________________________________________________________
-    max_pooling1d_4 (MaxPooling1 (None, 9, 64)             0         
-    _________________________________________________________________
-    flatten_1 (Flatten)          (None, 576)               0         
-    _________________________________________________________________
-    dropout_1 (Dropout)          (None, 576)               0         
-    _________________________________________________________________
-    dense_1 (Dense)              (None, 64)                36928     
-    _________________________________________________________________
-    dropout_2 (Dropout)          (None, 64)                0         
-    _________________________________________________________________
-    dense_2 (Dense)              (None, 64)                4160      
-    _________________________________________________________________
-    dense_3 (Dense)              (None, 1)                 65        
-    =================================================================
-    Total params: 71,241
-    Trainable params: 71,129
-    Non-trainable params: 112
-    _________________________________________________________________
-
 
 
 ```python
@@ -2140,25 +2081,75 @@ h1 = K.fit_cnn(X_train,y_train, X_test, y_test, m1,
 #         return history
 ```
 
+
+```python
+h1 = K.fit_cnn(X_train,y_train, X_test, y_test, m1,
+               validation_data=(X_test, y_test), verbose=2, epochs=5, 
+               steps_per_epoch=(X_train.shape[1]//32), batch_size=32)
+```
+
+    FITTING MODEL...
+    Epoch 1/5
+     - 26s - loss: 0.7978 - accuracy: 0.5044 - val_loss: 0.6152 - val_accuracy: 0.9351
+    Epoch 2/5
+     - 24s - loss: 0.7549 - accuracy: 0.5117 - val_loss: 0.6112 - val_accuracy: 0.8439
+    Epoch 3/5
+     - 26s - loss: 0.7197 - accuracy: 0.5319 - val_loss: 0.6259 - val_accuracy: 0.7386
+    Epoch 4/5
+     - 26s - loss: 0.7358 - accuracy: 0.5063 - val_loss: 0.6466 - val_accuracy: 0.6474
+    Epoch 5/5
+     - 23s - loss: 0.7300 - accuracy: 0.5142 - val_loss: 0.6549 - val_accuracy: 0.6193
+    TRAINING COMPLETE
+    Model: "sequential_1"
+    _________________________________________________________________
+    Layer (type)                 output Shape              Param #   
+    =================================================================
+    conv1d_1 (Conv1D)            (None, 3187, 8)           184       
+    _________________________________________________________________
+    max_pooling1d_1 (MaxPooling1 (None, 797, 8)            0         
+    _________________________________________________________________
+    batch_normalization_1 (Batch (None, 797, 8)            32        
+    _________________________________________________________________
+    conv1d_2 (Conv1D)            (None, 787, 16)           1424      
+    _________________________________________________________________
+    max_pooling1d_2 (MaxPooling1 (None, 197, 16)           0         
+    _________________________________________________________________
+    batch_normalization_2 (Batch (None, 197, 16)           64        
+    _________________________________________________________________
+    conv1d_3 (Conv1D)            (None, 187, 32)           5664      
+    _________________________________________________________________
+    max_pooling1d_3 (MaxPooling1 (None, 47, 32)            0         
+    _________________________________________________________________
+    batch_normalization_3 (Batch (None, 47, 32)            128       
+    _________________________________________________________________
+    conv1d_4 (Conv1D)            (None, 37, 64)            22592     
+    _________________________________________________________________
+    max_pooling1d_4 (MaxPooling1 (None, 9, 64)             0         
+    _________________________________________________________________
+    flatten_1 (Flatten)          (None, 576)               0         
+    _________________________________________________________________
+    dropout_1 (Dropout)          (None, 576)               0         
+    _________________________________________________________________
+    dense_1 (Dense)              (None, 64)                36928     
+    _________________________________________________________________
+    dropout_2 (Dropout)          (None, 64)                0         
+    _________________________________________________________________
+    dense_2 (Dense)              (None, 64)                4160      
+    _________________________________________________________________
+    dense_3 (Dense)              (None, 1)                 65        
+    =================================================================
+    Total params: 71,241
+    Trainable params: 71,129
+    Non-trainable params: 112
+    _________________________________________________________________
+
+
 ## Evaluate (M1)
 
 Let's assess the model thus far before tuning parameters. We'll create a few helper functions for calculating metrics and analyzing results visually. 
 
 ## Class Predictions
 
-
-
-
-```python
-y_true, y_pred = computer.get_preds(X_test,y_test, model=m1,verbose=True)
-```
-
-    y_pred:
-     0    354
-    1    216
-    dtype: int64
-    
-    
 
 
 
@@ -2181,27 +2172,20 @@ y_true, y_pred = computer.get_preds(X_test,y_test, model=m1,verbose=True)
 #     return y_true, y_pred
 ```
 
-### Rate of False Negatives and Positives (Training)
-
 
 ```python
-computer.fnfp(X_train, y_train, m1, training=True)
+y_true, y_pred = computer.get_preds(X_test,y_test, model=m1,verbose=True)
 ```
 
-    FN Rate (Training): 0.2556%
-    FP Rate (Training): 39.3945%
+    y_pred:
+     0    354
+    1    216
+    dtype: int64
+    
+    
 
 
-### Rate of False Negatives and Positives (Test)
-
-
-```python
-computer.fnfp(X_test, y_test, m1)
-```
-
-    FN Rate (Test): 0.5263%
-    FP Rate (Test): 37.5439%
-
+### False -/+ Rates (Training)
 
 
 ```python
@@ -2229,6 +2213,26 @@ computer.fnfp(X_test, y_test, m1)
 #         print(f"FN Rate (Test): {round(fn*100,4)}%")
 #         print(f"FP Rate (Test): {round(fp*100,4)}%")
 ```
+
+
+```python
+computer.fnfp(X_train, y_train, m1, training=True)
+```
+
+    FN Rate (Training): 0.2556%
+    FP Rate (Training): 39.4339%
+
+
+### False -/+ Rates (Test)
+
+
+```python
+computer.fnfp(X_test, y_test, m1)
+```
+
+    FN Rate (Test): 0.5263%
+    FP Rate (Test): 37.5439%
+
 
 ### Classification Report
 
@@ -2279,15 +2283,6 @@ The baseline model is not meant to give us optimal results - the real test will 
 
 
 ```python
-computer.keras_history(h1)
-```
-
-
-![png](output_78_0.png)
-
-
-
-```python
 # view function: keras_history()
 
 # def keras_history(history, figsize=(10,4)):
@@ -2318,6 +2313,15 @@ computer.keras_history(h1)
 #     plt.show()
 ```
 
+
+```python
+computer.keras_history(h1)
+```
+
+
+![png](outputs/output_80_0.png)
+
+
 With only a few epochs, and a small learning rate, it's obvious that our training parameters have a great deal of room for improvement. This is good - we will definitely need to adjust the learning rate. If that doesn't go far enough in producing desired results, we can also try using a different optimizer such as SGD instead of Adam. For now let's look at a few other key metrics.
 
 ## Fusion Matrix
@@ -2326,20 +2330,8 @@ It's like a confusion matrix, without the confusion...
 
 
 ```python
-m1_fusion = computer.fusion_matrix(matrix=(y_true,y_pred), 
-                          classes=['No Planet','Planet'], 
-                                   title='M1 Fusion Matrix')
-```
-
-
-![png](output_82_0.png)
-
-
-
-```python
-# view function: fusion_matrix()
-
-# def fusion_matrix(matrix, classes=None, normalize=False, title='Fusion Matrix', cmap='Blues',
+# View Function: fusion_matrix()
+# def fusion_matrix(matrix, classes=None, normalize=True, title='Fusion Matrix', cmap='Blues',
 #     print_raw=False): 
 #     """
 #     FUSION MATRIX!
@@ -2378,9 +2370,11 @@ m1_fusion = computer.fusion_matrix(matrix=(y_true,y_pred),
 #     # If so, normalize the raw fusion matrix before visualizing
 #     if normalize:
 #         fusion = fusion.astype('float') / fusion.sum(axis=1)[:, np.newaxis]
+#         thresh = 0.5
 #         fmt='.2f'
 #     else:
 #         fmt='d'
+#         thresh = fusion.max() / 2.
     
 #     # PLOT
 #     fig, ax = plt.subplots(figsize=(10,10))
@@ -2400,7 +2394,7 @@ m1_fusion = computer.fusion_matrix(matrix=(y_true,y_pred),
 #     # Text formatting
 #     fmt = '.2f' if normalize else 'd'
 #     # Add labels to each cell
-#     thresh = fusion.max() / 2.
+#     #thresh = fusion.max() / 2.
 #     # iterate thru matrix and append labels  
 #     for i, j in itertools.product(range(fusion.shape[0]), range(fusion.shape[1])):
 #         plt.text(j, i, format(fusion[i, j], fmt),
@@ -2414,20 +2408,22 @@ m1_fusion = computer.fusion_matrix(matrix=(y_true,y_pred),
 #     return fusion, fig
 ```
 
+
+```python
+m1_fusion = computer.fusion_matrix(matrix=(y_true,y_pred), 
+                          classes=['No Planet','Planet'], 
+                                   title='M1 Fusion Matrix')
+```
+
+
+![png](outputs/output_84_0.png)
+
+
 The baseline model only managed to correctly identify 2 planets in the test set, while missing the other 3. The model incorrectly classified 215 non-TCEs as planets. 
 
 ## ROC AUC
 
 Plot the ROC area under the curve
-
-
-```python
-m1_roc = computer.roc_plots(X_test, y_test, m1)
-```
-
-
-![png](output_86_0.png)
-
 
 
 ```python
@@ -2465,6 +2461,15 @@ m1_roc = computer.roc_plots(X_test, y_test, m1)
 
 #     return roc
 ```
+
+
+```python
+m1_roc = computer.roc_plots(X_test, y_test, m1)
+```
+
+
+![png](outputs/output_88_0.png)
+
 
 # `Model 2`
 
@@ -2506,49 +2511,49 @@ h2 = K.fit_cnn(X_train,y_train, X_test, y_test, m2,
 
     FITTING MODEL...
     Epoch 1/20
-     - 18s - loss: 0.6963 - accuracy: 0.5792 - val_loss: 0.8951 - val_accuracy: 0.0281
+     - 22s - loss: 0.6945 - accuracy: 0.5827 - val_loss: 0.9014 - val_accuracy: 0.0193
     Epoch 2/20
-     - 17s - loss: 0.6170 - accuracy: 0.6686 - val_loss: 0.7812 - val_accuracy: 0.3754
+     - 24s - loss: 0.6220 - accuracy: 0.6493 - val_loss: 0.8088 - val_accuracy: 0.2842
     Epoch 3/20
-     - 18s - loss: 0.5714 - accuracy: 0.7109 - val_loss: 0.5495 - val_accuracy: 0.7912
+     - 26s - loss: 0.5791 - accuracy: 0.7033 - val_loss: 0.6019 - val_accuracy: 0.7175
     Epoch 4/20
-     - 19s - loss: 0.5186 - accuracy: 0.7468 - val_loss: 0.4270 - val_accuracy: 0.8526
+     - 27s - loss: 0.5302 - accuracy: 0.7276 - val_loss: 0.4064 - val_accuracy: 0.8509
     Epoch 5/20
-     - 18s - loss: 0.4791 - accuracy: 0.7749 - val_loss: 0.5623 - val_accuracy: 0.7158
+     - 29s - loss: 0.4857 - accuracy: 0.7715 - val_loss: 0.5536 - val_accuracy: 0.7140
     Epoch 6/20
-     - 21s - loss: 0.4463 - accuracy: 0.8024 - val_loss: 0.4600 - val_accuracy: 0.7754
+     - 25s - loss: 0.4389 - accuracy: 0.7986 - val_loss: 0.4794 - val_accuracy: 0.7316
     Epoch 7/20
-     - 17s - loss: 0.4060 - accuracy: 0.8210 - val_loss: 0.4943 - val_accuracy: 0.7474
+     - 24s - loss: 0.4059 - accuracy: 0.8220 - val_loss: 0.6372 - val_accuracy: 0.6351
     Epoch 8/20
-     - 18s - loss: 0.3578 - accuracy: 0.8406 - val_loss: 0.8106 - val_accuracy: 0.5825
+     - 29s - loss: 0.3419 - accuracy: 0.8488 - val_loss: 0.7515 - val_accuracy: 0.5930
     Epoch 9/20
-     - 17s - loss: 0.3021 - accuracy: 0.8741 - val_loss: 0.5053 - val_accuracy: 0.7351
+     - 28s - loss: 0.3195 - accuracy: 0.8665 - val_loss: 0.4455 - val_accuracy: 0.7667
     Epoch 10/20
-     - 17s - loss: 0.2565 - accuracy: 0.9003 - val_loss: 1.1649 - val_accuracy: 0.5018
+     - 27s - loss: 0.2705 - accuracy: 0.8971 - val_loss: 0.8245 - val_accuracy: 0.6070
     Epoch 11/20
-     - 17s - loss: 0.2251 - accuracy: 0.9141 - val_loss: 0.5963 - val_accuracy: 0.7175
+     - 28s - loss: 0.2380 - accuracy: 0.9066 - val_loss: 0.2590 - val_accuracy: 0.8789
     Epoch 12/20
-     - 18s - loss: 0.1990 - accuracy: 0.9255 - val_loss: 0.3648 - val_accuracy: 0.8561
+     - 23s - loss: 0.2056 - accuracy: 0.9274 - val_loss: 0.3441 - val_accuracy: 0.8684
     Epoch 13/20
-     - 18s - loss: 0.1801 - accuracy: 0.9321 - val_loss: 0.2194 - val_accuracy: 0.9053
+     - 41s - loss: 0.1805 - accuracy: 0.9280 - val_loss: 0.1826 - val_accuracy: 0.9298
     Epoch 14/20
-     - 18s - loss: 0.1715 - accuracy: 0.9426 - val_loss: 0.1293 - val_accuracy: 0.9491
+     - 30s - loss: 0.1878 - accuracy: 0.9397 - val_loss: 0.1023 - val_accuracy: 0.9684
     Epoch 15/20
-     - 17s - loss: 0.1536 - accuracy: 0.9454 - val_loss: 0.1135 - val_accuracy: 0.9702
+     - 23s - loss: 0.1755 - accuracy: 0.9451 - val_loss: 0.1844 - val_accuracy: 0.9404
     Epoch 16/20
-     - 17s - loss: 0.1700 - accuracy: 0.9372 - val_loss: 0.1084 - val_accuracy: 0.9649
+     - 23s - loss: 0.1658 - accuracy: 0.9400 - val_loss: 0.3103 - val_accuracy: 0.8719
     Epoch 17/20
-     - 17s - loss: 0.1406 - accuracy: 0.9517 - val_loss: 0.2038 - val_accuracy: 0.9404
+     - 23s - loss: 0.1483 - accuracy: 0.9501 - val_loss: 0.1477 - val_accuracy: 0.9526
     Epoch 18/20
-     - 18s - loss: 0.1524 - accuracy: 0.9457 - val_loss: 0.1397 - val_accuracy: 0.9579
+     - 23s - loss: 0.1628 - accuracy: 0.9470 - val_loss: 0.1443 - val_accuracy: 0.9439
     Epoch 19/20
-     - 18s - loss: 0.0919 - accuracy: 0.9665 - val_loss: 0.0927 - val_accuracy: 0.9789
+     - 29s - loss: 0.1118 - accuracy: 0.9631 - val_loss: 0.1330 - val_accuracy: 0.9614
     Epoch 20/20
-     - 18s - loss: 0.1004 - accuracy: 0.9631 - val_loss: 0.0429 - val_accuracy: 0.9965
+     - 31s - loss: 0.1173 - accuracy: 0.9580 - val_loss: 0.0629 - val_accuracy: 0.9842
     TRAINING COMPLETE
     Model: "sequential_2"
     _________________________________________________________________
-    Layer (type)                 Output Shape              Param #   
+    Layer (type)                 output Shape              Param #   
     =================================================================
     conv1d_5 (Conv1D)            (None, 3187, 8)           184       
     _________________________________________________________________
@@ -2596,17 +2601,89 @@ The `compute` function combines all the functions used above for calculating the
 
 
 ```python
+# view function: compute()
+# def compute(X, y, model, hist=None, preds=True, summary=True, fusion=True, 
+#             classes=None, report=True, roc=True):
+#     """
+#     evaluates model predictions and stores the output in a dict
+#     returns `results`
+#     """
+#     import pandas as pd
+#     import matplotlib.pyplot as plt
+#     from sklearn import metrics
+#     from sklearn.metrics import jaccard_score,accuracy_score, recall_score, fowlkes_mallows_score
+
+#     # initialize a spare improbability drive
+#     res = {}
+#     res['model'] = model.name
+    
+#     # class predictions 
+#     if preds:
+#         y_true = y.flatten()
+#         y_pred = model.predict_classes(X).flatten()
+#         res['preds'] = [y_pred]
+
+#     if summary:
+#         summary = model.summary()
+#         res['summary'] = model.summary
+
+
+#     # FUSION MATRIX
+#     if fusion:
+#         if classes is None:
+#             classes=['0','1']
+#         else:
+#             classes=classes
+#         # Plot fusion matrix
+#         FM = fusion_matrix(matrix=(y_true,y_pred), 
+#                                     classes=classes)
+#         res['FM'] = FM
+
+#     # ROC Area Under Curve
+#     if roc:
+#         ROC = roc_plots(X, y, model)
+#         res['ROC'] = ROC
+
+#     # CLASSIFICATION REPORT
+#     if report:
+#         num_dashes=20
+#         print('\n')
+#         print('---'*num_dashes)
+#         print('\tCLASSIFICATION REPORT:')
+#         print('---'*num_dashes)
+#         # generate report
+#         report = metrics.classification_report(y_true,y_pred)
+#         res['report'] = report
+#         print(report)
+
+
+#     # save to dict:
+#     res['jaccard'] = jaccard_score(y_true, y_pred)
+#     res['fowlkes'] = fowlkes_mallows_score(y_true,y_pred)
+#     res['accuracy'] = accuracy_score(y_true, y_pred)
+#     res['recall'] = recall_score(y_true, y_pred)
+    
+#     #Plot Model Training Results (PLOT KERAS HISTORY)
+#     if hist is not None:
+#         HIST = keras_history(hist)
+#         res['HIST'] = HIST
+
+#     return res
+```
+
+
+```python
 res_m2 = computer.compute(X=X_test, y=y_test, model=m2, hist=h2, preds=True, 
                summary=False, report=True, fusion=True, 
                classes=['No Planet','Planet'],roc=True)
 ```
 
 
-![png](output_94_0.png)
+![png](outputs/output_96_0.png)
 
 
 
-![png](output_94_1.png)
+![png](outputs/output_96_1.png)
 
 
     
@@ -2616,17 +2693,17 @@ res_m2 = computer.compute(X=X_test, y=y_test, model=m2, hist=h2, preds=True,
     ------------------------------------------------------------
                   precision    recall  f1-score   support
     
-             0.0       1.00      1.00      1.00       565
-             1.0       0.71      1.00      0.83         5
+             0.0       1.00      0.98      0.99       565
+             1.0       0.36      1.00      0.53         5
     
-        accuracy                           1.00       570
-       macro avg       0.86      1.00      0.92       570
-    weighted avg       1.00      1.00      1.00       570
+        accuracy                           0.98       570
+       macro avg       0.68      0.99      0.76       570
+    weighted avg       0.99      0.98      0.99       570
     
 
 
 
-![png](output_94_3.png)
+![png](outputs/output_96_3.png)
 
 
 
@@ -2634,20 +2711,33 @@ res_m2 = computer.compute(X=X_test, y=y_test, model=m2, hist=h2, preds=True,
 # We can retrieve a given metric from the computer's compute function 
 # by accessing any of the given keys from the RES dictionary
 
-# res1.keys()
+# res_m2.keys()
 
-# res1['model']
-# res1['preds']
-# res1['summary']()
-# res1['FM'][0]
-# res1['FM'][1]
-# res1['ROC']
-#print(res1['report'])
-# res1['jaccard']
-# res1['accuracy']
-# res1['recall']
-#res1['HIST']
+# ['model']
+# ['preds']
+# ['summary']()
+# ['FM'][0]
+# ['FM'][1]
+# ['ROC']
+#print(res_m2['report'])
+# ['jaccard']
+ #res_m2['fowlkes']
+# ['accuracy']
+# ['recall']
+# ['HIST']
 ```
+
+
+```python
+res_m2['fowlkes']
+```
+
+
+
+
+    0.9840290257993071
+
+
 
 # `MODEL 3`
 
@@ -2687,83 +2777,83 @@ h3 = K.fit_cnn(X_train,y_train, X_test, y_test, m3,
 
     FITTING MODEL...
     Epoch 1/20
-     - 16s - loss: 0.6168 - accuracy: 0.6840 - val_loss: 0.4940 - val_accuracy: 0.7895
+     - 22s - loss: 0.6099 - accuracy: 0.6657 - val_loss: 0.0556 - val_accuracy: 0.9895
     Epoch 2/20
-     - 17s - loss: 0.4595 - accuracy: 0.7945 - val_loss: 0.6731 - val_accuracy: 0.5368
+     - 21s - loss: 0.4555 - accuracy: 0.7945 - val_loss: 0.2497 - val_accuracy: 0.9088
     Epoch 3/20
-     - 18s - loss: 0.4137 - accuracy: 0.8144 - val_loss: 1.5706 - val_accuracy: 0.2702
+     - 18s - loss: 0.3589 - accuracy: 0.8523 - val_loss: 0.3350 - val_accuracy: 0.8404
     Epoch 4/20
-     - 17s - loss: 0.3486 - accuracy: 0.8554 - val_loss: 1.8025 - val_accuracy: 0.3474
+     - 17s - loss: 0.2505 - accuracy: 0.8987 - val_loss: 0.3346 - val_accuracy: 0.8649
     Epoch 5/20
-     - 17s - loss: 0.2353 - accuracy: 0.9122 - val_loss: 0.9206 - val_accuracy: 0.6632
+     - 17s - loss: 0.3538 - accuracy: 0.8475 - val_loss: 0.2626 - val_accuracy: 0.8649
     Epoch 6/20
-     - 17s - loss: 0.3182 - accuracy: 0.8756 - val_loss: 0.1347 - val_accuracy: 0.9579
+     - 17s - loss: 0.2716 - accuracy: 0.8911 - val_loss: 0.0878 - val_accuracy: 0.9737
     Epoch 7/20
-     - 17s - loss: 0.2137 - accuracy: 0.9160 - val_loss: 0.1280 - val_accuracy: 0.9860
+     - 18s - loss: 0.2058 - accuracy: 0.9205 - val_loss: 0.1999 - val_accuracy: 0.9333
     Epoch 8/20
-     - 17s - loss: 0.1443 - accuracy: 0.9467 - val_loss: 0.0610 - val_accuracy: 0.9842
+     - 17s - loss: 0.1560 - accuracy: 0.9441 - val_loss: 0.3655 - val_accuracy: 0.8333
     Epoch 9/20
-     - 17s - loss: 0.0959 - accuracy: 0.9662 - val_loss: 0.0407 - val_accuracy: 0.9965
+     - 19s - loss: 0.1411 - accuracy: 0.9454 - val_loss: 0.2266 - val_accuracy: 0.8930
     Epoch 10/20
-     - 16s - loss: 0.0912 - accuracy: 0.9719 - val_loss: 0.0475 - val_accuracy: 0.9912
+     - 23s - loss: 0.1298 - accuracy: 0.9504 - val_loss: 0.1879 - val_accuracy: 0.9456
     Epoch 11/20
-     - 16s - loss: 0.0806 - accuracy: 0.9713 - val_loss: 0.0631 - val_accuracy: 0.9807
+     - 18s - loss: 0.1369 - accuracy: 0.9539 - val_loss: 0.0602 - val_accuracy: 0.9825
     Epoch 12/20
-     - 17s - loss: 0.0655 - accuracy: 0.9795 - val_loss: 0.0304 - val_accuracy: 0.9982
+     - 22s - loss: 0.1084 - accuracy: 0.9618 - val_loss: 0.0592 - val_accuracy: 0.9807
     Epoch 13/20
-     - 16s - loss: 0.1022 - accuracy: 0.9700 - val_loss: 0.1527 - val_accuracy: 0.9544
+     - 22s - loss: 0.0720 - accuracy: 0.9751 - val_loss: 0.0496 - val_accuracy: 0.9912
     Epoch 14/20
-     - 17s - loss: 0.0816 - accuracy: 0.9716 - val_loss: 0.0438 - val_accuracy: 0.9912
+     - 18s - loss: 0.0986 - accuracy: 0.9640 - val_loss: 0.0982 - val_accuracy: 0.9719
     Epoch 15/20
-     - 16s - loss: 0.0513 - accuracy: 0.9833 - val_loss: 0.1265 - val_accuracy: 0.9614
+     - 21s - loss: 0.1033 - accuracy: 0.9624 - val_loss: 0.0443 - val_accuracy: 0.9807
     Epoch 16/20
-     - 16s - loss: 0.0499 - accuracy: 0.9826 - val_loss: 0.0382 - val_accuracy: 0.9947
+     - 19s - loss: 0.1129 - accuracy: 0.9586 - val_loss: 0.3545 - val_accuracy: 0.8596
     Epoch 17/20
-     - 17s - loss: 0.0449 - accuracy: 0.9848 - val_loss: 0.0548 - val_accuracy: 0.9842
+     - 19s - loss: 0.1059 - accuracy: 0.9612 - val_loss: 0.4088 - val_accuracy: 0.8754
     Epoch 18/20
-     - 17s - loss: 0.0480 - accuracy: 0.9830 - val_loss: 0.0388 - val_accuracy: 0.9912
+     - 17s - loss: 0.1018 - accuracy: 0.9634 - val_loss: 0.1042 - val_accuracy: 0.9614
     Epoch 19/20
-     - 16s - loss: 0.0433 - accuracy: 0.9886 - val_loss: 0.0425 - val_accuracy: 0.9930
+     - 17s - loss: 0.0753 - accuracy: 0.9729 - val_loss: 0.0507 - val_accuracy: 0.9842
     Epoch 20/20
-     - 16s - loss: 0.0527 - accuracy: 0.9823 - val_loss: 0.0373 - val_accuracy: 0.9930
+     - 17s - loss: 0.0587 - accuracy: 0.9779 - val_loss: 0.0699 - val_accuracy: 0.9789
     TRAINING COMPLETE
-    Model: "sequential_4"
+    Model: "sequential_3"
     _________________________________________________________________
-    Layer (type)                 Output Shape              Param #   
+    Layer (type)                 output Shape              Param #   
     =================================================================
-    conv1d_13 (Conv1D)           (None, 3187, 8)           184       
+    conv1d_9 (Conv1D)            (None, 3187, 8)           184       
     _________________________________________________________________
-    max_pooling1d_13 (MaxPooling (None, 797, 8)            0         
+    max_pooling1d_9 (MaxPooling1 (None, 797, 8)            0         
     _________________________________________________________________
-    batch_normalization_10 (Batc (None, 797, 8)            32        
+    batch_normalization_7 (Batch (None, 797, 8)            32        
     _________________________________________________________________
-    conv1d_14 (Conv1D)           (None, 787, 16)           1424      
+    conv1d_10 (Conv1D)           (None, 787, 16)           1424      
     _________________________________________________________________
-    max_pooling1d_14 (MaxPooling (None, 197, 16)           0         
+    max_pooling1d_10 (MaxPooling (None, 197, 16)           0         
     _________________________________________________________________
-    batch_normalization_11 (Batc (None, 197, 16)           64        
+    batch_normalization_8 (Batch (None, 197, 16)           64        
     _________________________________________________________________
-    conv1d_15 (Conv1D)           (None, 187, 32)           5664      
+    conv1d_11 (Conv1D)           (None, 187, 32)           5664      
     _________________________________________________________________
-    max_pooling1d_15 (MaxPooling (None, 47, 32)            0         
+    max_pooling1d_11 (MaxPooling (None, 47, 32)            0         
     _________________________________________________________________
-    batch_normalization_12 (Batc (None, 47, 32)            128       
+    batch_normalization_9 (Batch (None, 47, 32)            128       
     _________________________________________________________________
-    conv1d_16 (Conv1D)           (None, 37, 64)            22592     
+    conv1d_12 (Conv1D)           (None, 37, 64)            22592     
     _________________________________________________________________
-    max_pooling1d_16 (MaxPooling (None, 9, 64)             0         
+    max_pooling1d_12 (MaxPooling (None, 9, 64)             0         
     _________________________________________________________________
-    flatten_4 (Flatten)          (None, 576)               0         
+    flatten_3 (Flatten)          (None, 576)               0         
     _________________________________________________________________
-    dropout_7 (Dropout)          (None, 576)               0         
+    dropout_5 (Dropout)          (None, 576)               0         
     _________________________________________________________________
-    dense_10 (Dense)             (None, 64)                36928     
+    dense_7 (Dense)              (None, 64)                36928     
     _________________________________________________________________
-    dropout_8 (Dropout)          (None, 64)                0         
+    dropout_6 (Dropout)          (None, 64)                0         
     _________________________________________________________________
-    dense_11 (Dense)             (None, 64)                4160      
+    dense_8 (Dense)              (None, 64)                4160      
     _________________________________________________________________
-    dense_12 (Dense)             (None, 1)                 65        
+    dense_9 (Dense)              (None, 1)                 65        
     =================================================================
     Total params: 71,241
     Trainable params: 71,129
@@ -2781,11 +2871,11 @@ res_m3 = computer.compute(X=X_test, y=y_test, model=m3, hist=h3, preds=True,
 ```
 
 
-![png](output_102_0.png)
+![png](outputs/output_105_0.png)
 
 
 
-![png](output_102_1.png)
+![png](outputs/output_105_1.png)
 
 
     
@@ -2795,17 +2885,17 @@ res_m3 = computer.compute(X=X_test, y=y_test, model=m3, hist=h3, preds=True,
     ------------------------------------------------------------
                   precision    recall  f1-score   support
     
-             0.0       1.00      0.99      1.00       565
-             1.0       0.56      1.00      0.71         5
+             0.0       1.00      0.98      0.99       565
+             1.0       0.29      1.00      0.45         5
     
-        accuracy                           0.99       570
-       macro avg       0.78      1.00      0.86       570
-    weighted avg       1.00      0.99      0.99       570
+        accuracy                           0.98       570
+       macro avg       0.65      0.99      0.72       570
+    weighted avg       0.99      0.98      0.98       570
     
 
 
 
-![png](output_102_3.png)
+![png](outputs/output_105_3.png)
 
 
 It appears that increasing the learning rate did not help to improve the model's performance. While it still identified all 5 planets, it misclassified 4 non-planets as planets, two more than model 2. Let's see if we can decrease the False Positive Rate, while Maintaining the False Negative Rate at zero. We'll go back to Model 2's original learning rate of 3e-4, this time increasing the number of epochs instead.
@@ -2848,75 +2938,75 @@ h4 = K.fit_cnn(X_train,y_train, X_test, y_test, m4,
 
     FITTING MODEL...
     Epoch 1/33
-     - 17s - loss: 0.7066 - accuracy: 0.5758 - val_loss: 0.6493 - val_accuracy: 0.7035
+     - 17s - loss: 0.6739 - accuracy: 0.5931 - val_loss: 0.8185 - val_accuracy: 0.1211
     Epoch 2/33
-     - 18s - loss: 0.6380 - accuracy: 0.6417 - val_loss: 0.5416 - val_accuracy: 0.8491
+     - 18s - loss: 0.6006 - accuracy: 0.6777 - val_loss: 0.6971 - val_accuracy: 0.4772
     Epoch 3/33
-     - 19s - loss: 0.5928 - accuracy: 0.6869 - val_loss: 0.4485 - val_accuracy: 0.8561
+     - 20s - loss: 0.5806 - accuracy: 0.6989 - val_loss: 0.4942 - val_accuracy: 0.8281
     Epoch 4/33
-     - 18s - loss: 0.5355 - accuracy: 0.7326 - val_loss: 0.4015 - val_accuracy: 0.8263
+     - 19s - loss: 0.5300 - accuracy: 0.7412 - val_loss: 0.4063 - val_accuracy: 0.8439
     Epoch 5/33
-     - 18s - loss: 0.4855 - accuracy: 0.7607 - val_loss: 0.4423 - val_accuracy: 0.7912
+     - 18s - loss: 0.4974 - accuracy: 0.7620 - val_loss: 0.4653 - val_accuracy: 0.7614
     Epoch 6/33
-     - 18s - loss: 0.4230 - accuracy: 0.8059 - val_loss: 0.3697 - val_accuracy: 0.8175
+     - 18s - loss: 0.4563 - accuracy: 0.7907 - val_loss: 0.7816 - val_accuracy: 0.5632
     Epoch 7/33
-     - 17s - loss: 0.3168 - accuracy: 0.8636 - val_loss: 0.3396 - val_accuracy: 0.8386
+     - 18s - loss: 0.4144 - accuracy: 0.8239 - val_loss: 0.5558 - val_accuracy: 0.7140
     Epoch 8/33
-     - 17s - loss: 0.2921 - accuracy: 0.8804 - val_loss: 0.1984 - val_accuracy: 0.8825
+     - 18s - loss: 0.3503 - accuracy: 0.8561 - val_loss: 0.1770 - val_accuracy: 0.9228
     Epoch 9/33
-     - 17s - loss: 0.2371 - accuracy: 0.9006 - val_loss: 0.1593 - val_accuracy: 0.9298
+     - 19s - loss: 0.3230 - accuracy: 0.8636 - val_loss: 0.2454 - val_accuracy: 0.8807
     Epoch 10/33
-     - 18s - loss: 0.2315 - accuracy: 0.9110 - val_loss: 0.2077 - val_accuracy: 0.9035
+     - 18s - loss: 0.2673 - accuracy: 0.8984 - val_loss: 0.9147 - val_accuracy: 0.6526
     Epoch 11/33
-     - 17s - loss: 0.1909 - accuracy: 0.9271 - val_loss: 0.2982 - val_accuracy: 0.8807
+     - 18s - loss: 0.2434 - accuracy: 0.9091 - val_loss: 0.8955 - val_accuracy: 0.6228
     Epoch 12/33
-     - 18s - loss: 0.1944 - accuracy: 0.9296 - val_loss: 0.1362 - val_accuracy: 0.9491
+     - 18s - loss: 0.2401 - accuracy: 0.9119 - val_loss: 0.5549 - val_accuracy: 0.7474
     Epoch 13/33
-     - 18s - loss: 0.1673 - accuracy: 0.9378 - val_loss: 0.2298 - val_accuracy: 0.9175
+     - 17s - loss: 0.1985 - accuracy: 0.9227 - val_loss: 0.2674 - val_accuracy: 0.8860
     Epoch 14/33
-     - 18s - loss: 0.1366 - accuracy: 0.9533 - val_loss: 0.1078 - val_accuracy: 0.9667
+     - 19s - loss: 0.2019 - accuracy: 0.9255 - val_loss: 0.1316 - val_accuracy: 0.9439
     Epoch 15/33
-     - 18s - loss: 0.1530 - accuracy: 0.9460 - val_loss: 0.0975 - val_accuracy: 0.9632
+     - 17s - loss: 0.1642 - accuracy: 0.9416 - val_loss: 0.0758 - val_accuracy: 0.9702
     Epoch 16/33
-     - 18s - loss: 0.1140 - accuracy: 0.9580 - val_loss: 0.0970 - val_accuracy: 0.9667
+     - 17s - loss: 0.1833 - accuracy: 0.9331 - val_loss: 0.0558 - val_accuracy: 0.9860
     Epoch 17/33
-     - 18s - loss: 0.1071 - accuracy: 0.9631 - val_loss: 0.1246 - val_accuracy: 0.9614
+     - 17s - loss: 0.1506 - accuracy: 0.9476 - val_loss: 0.2535 - val_accuracy: 0.9035
     Epoch 18/33
-     - 18s - loss: 0.1230 - accuracy: 0.9586 - val_loss: 0.1308 - val_accuracy: 0.9632
+     - 17s - loss: 0.1445 - accuracy: 0.9501 - val_loss: 0.1732 - val_accuracy: 0.9368
     Epoch 19/33
-     - 18s - loss: 0.1272 - accuracy: 0.9514 - val_loss: 0.0802 - val_accuracy: 0.9789
+     - 17s - loss: 0.1302 - accuracy: 0.9558 - val_loss: 0.1816 - val_accuracy: 0.9474
     Epoch 20/33
-     - 18s - loss: 0.0997 - accuracy: 0.9650 - val_loss: 0.0773 - val_accuracy: 0.9737
+     - 17s - loss: 0.1176 - accuracy: 0.9586 - val_loss: 0.0928 - val_accuracy: 0.9737
     Epoch 21/33
-     - 17s - loss: 0.1017 - accuracy: 0.9621 - val_loss: 0.0756 - val_accuracy: 0.9825
+     - 17s - loss: 0.1099 - accuracy: 0.9653 - val_loss: 0.0820 - val_accuracy: 0.9754
     Epoch 22/33
-     - 18s - loss: 0.1312 - accuracy: 0.9558 - val_loss: 0.0570 - val_accuracy: 0.9807
+     - 17s - loss: 0.1263 - accuracy: 0.9552 - val_loss: 0.0566 - val_accuracy: 0.9825
     Epoch 23/33
-     - 18s - loss: 0.1018 - accuracy: 0.9659 - val_loss: 0.0707 - val_accuracy: 0.9825
+     - 18s - loss: 0.1067 - accuracy: 0.9628 - val_loss: 0.0553 - val_accuracy: 0.9877
     Epoch 24/33
-     - 17s - loss: 0.0885 - accuracy: 0.9697 - val_loss: 0.0555 - val_accuracy: 0.9877
+     - 19s - loss: 0.1192 - accuracy: 0.9605 - val_loss: 0.0911 - val_accuracy: 0.9649
     Epoch 25/33
-     - 18s - loss: 0.0836 - accuracy: 0.9700 - val_loss: 0.0570 - val_accuracy: 0.9895
+     - 17s - loss: 0.0929 - accuracy: 0.9675 - val_loss: 0.1150 - val_accuracy: 0.9632
     Epoch 26/33
-     - 18s - loss: 0.0628 - accuracy: 0.9789 - val_loss: 0.0591 - val_accuracy: 0.9895
+     - 18s - loss: 0.0912 - accuracy: 0.9688 - val_loss: 0.0455 - val_accuracy: 0.9895
     Epoch 27/33
-     - 17s - loss: 0.0737 - accuracy: 0.9747 - val_loss: 0.0645 - val_accuracy: 0.9842
+     - 19s - loss: 0.0942 - accuracy: 0.9672 - val_loss: 0.0470 - val_accuracy: 0.9877
     Epoch 28/33
-     - 17s - loss: 0.0710 - accuracy: 0.9757 - val_loss: 0.0722 - val_accuracy: 0.9842
+     - 18s - loss: 0.0875 - accuracy: 0.9700 - val_loss: 0.0856 - val_accuracy: 0.9737
     Epoch 29/33
-     - 17s - loss: 0.0704 - accuracy: 0.9773 - val_loss: 0.0597 - val_accuracy: 0.9842
+     - 18s - loss: 0.0784 - accuracy: 0.9713 - val_loss: 0.0888 - val_accuracy: 0.9754
     Epoch 30/33
-     - 17s - loss: 0.0596 - accuracy: 0.9823 - val_loss: 0.0940 - val_accuracy: 0.9772
+     - 18s - loss: 0.0860 - accuracy: 0.9706 - val_loss: 0.0523 - val_accuracy: 0.9895
     Epoch 31/33
-     - 19s - loss: 0.0540 - accuracy: 0.9833 - val_loss: 0.0795 - val_accuracy: 0.9807
+     - 18s - loss: 0.0967 - accuracy: 0.9694 - val_loss: 0.1047 - val_accuracy: 0.9649
     Epoch 32/33
-     - 17s - loss: 0.0616 - accuracy: 0.9782 - val_loss: 0.1153 - val_accuracy: 0.9667
+     - 18s - loss: 0.0722 - accuracy: 0.9757 - val_loss: 0.0571 - val_accuracy: 0.9825
     Epoch 33/33
-     - 17s - loss: 0.0618 - accuracy: 0.9817 - val_loss: 0.1042 - val_accuracy: 0.9702
+     - 17s - loss: 0.0965 - accuracy: 0.9678 - val_loss: 0.1138 - val_accuracy: 0.9596
     TRAINING COMPLETE
     Model: "sequential_5"
     _________________________________________________________________
-    Layer (type)                 Output Shape              Param #   
+    Layer (type)                 output Shape              Param #   
     =================================================================
     conv1d_17 (Conv1D)           (None, 3187, 8)           184       
     _________________________________________________________________
@@ -2968,11 +3058,11 @@ res_m4 = computer.compute(X=X_test, y=y_test, model=m4, hist=h4, preds=True,
 ```
 
 
-![png](output_110_0.png)
+![png](outputs/output_113_0.png)
 
 
 
-![png](output_110_1.png)
+![png](outputs/output_113_1.png)
 
 
     
@@ -2982,30 +3072,32 @@ res_m4 = computer.compute(X=X_test, y=y_test, model=m4, hist=h4, preds=True,
     ------------------------------------------------------------
                   precision    recall  f1-score   support
     
-             0.0       1.00      0.97      0.98       565
-             1.0       0.23      1.00      0.37         5
+             0.0       1.00      0.96      0.98       565
+             1.0       0.18      1.00      0.30         5
     
-        accuracy                           0.97       570
-       macro avg       0.61      0.98      0.68       570
-    weighted avg       0.99      0.97      0.98       570
+        accuracy                           0.96       570
+       macro avg       0.59      0.98      0.64       570
+    weighted avg       0.99      0.96      0.97       570
     
 
 
 
-![png](output_110_3.png)
+![png](outputs/output_113_3.png)
 
-
-
-```python
-# %mkdir models
-m2.save_weights('models/k2_cnn1d.h5')
-```
 
 # Interpret Results
 
 ## Conclusion
 
 Above, we were able to identify with 99% accuracy 5 of 5 stars with an orbiting exoplanet (or exoplanets). The best model (MODEL 2) incorrectly predicted just 2 False Positives, with ZERO false negatives. 
+
+## Save Weights (Model 2)
+
+
+```python
+# # %mkdir models
+# m2.save_weights('models/k2_cnn1d.h5')
+```
 
 # Recommendations
 
