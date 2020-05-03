@@ -9,6 +9,7 @@ __MACOSX
 *.tfevents
 *.fits
 *.csv
+*.png
 .learn
 Icon?
 
