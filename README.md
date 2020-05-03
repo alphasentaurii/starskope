@@ -13,11 +13,12 @@
 
     Note: this project is divided into 3 notebooks:
 
-    starskøpe : Binary Classification of K2 Timeseries Photometry Data using a Convolutional Neural Network
-    starskøpe-2:  Image Classification of Spectrographs using Keras CNN
-    starskøpe-3: Stacking autoencoded RBMs into single robust Deep Boltzmann Machine
+    * starskøpe : Binary Classification of K2 Timeseries Photometry Data using a Convolutional Neural Network
+    * starskøpe-2:  Image Classification of Spectrographs using Keras CNN
+    * starskøpe-3: Stacking autoencoded RBMs into single robust Deep Boltzmann Machine
 
-[transiting-planet]("https://github.com/hakkeray/starskope/blob/master/288_planetbleed1600.jpeg")
+![transiting-planet](https://github.com/hakkeray/starskope/blob/master/288_planetbleed1600.jpeg)
+source: NASA
 
 # Mission Brief
 
@@ -95,7 +96,7 @@ from fsds_100719.imports import *
     fsds_1007219  v0.7.20 loaded.  Read the docs: https://fsds.readthedocs.io/en/latest/ 
 
 
-
+<html>
 <style  type="text/css" >
 </style><table id="T_56889908_8d6f_11ea_b585_14109fdfaded" ><caption>Loaded Packages and Handles</caption><thead>    <tr>        <th class="col_heading level0 col0" >Handle</th>        <th class="col_heading level0 col1" >Package</th>        <th class="col_heading level0 col2" >Description</th>    </tr></thead><tbody>
                 <tr>
@@ -134,25 +135,7 @@ from fsds_100719.imports import *
                         <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow6_col2" class="data row6 col2" >High-level data visualization library based on matplotlib</td>
             </tr>
     </tbody></table>
-
-
-
-        <script type="text/javascript">
-        window.PlotlyConfig = {MathJaxConfig: 'local'};
-        if (window.MathJax) {MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}
-        if (typeof require !== 'undefined') {
-        require.undef("plotly");
-        requirejs.config({
-            paths: {
-                'plotly': ['https://cdn.plot.ly/plotly-latest.min']
-            }
-        });
-        require(['plotly'], function(Plotly) {
-            window._Plotly = Plotly;
-        });
-        }
-        </script>
-        
+</html>     
 
 
     [i] Pandas .iplot() method activated.
@@ -310,19 +293,7 @@ display(train.head(), test.head())
 <html>
 <body>
 <div>
-<style>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
 
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -851,19 +822,7 @@ display(train.head(), test.head())
 
 
 <div>
-<style>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
 
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
