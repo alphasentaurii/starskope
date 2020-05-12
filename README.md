@@ -8,8 +8,6 @@
 * `Date: 4.7.2020`
 * `Instructor: James Irving PhD`
 * `Data Science Full-Time Program`
-* `Blog post:` http://www.hakkeray.com/datascience/2020/04/01/starskope-cyberoptic-artificial-telescope.html
-* `Non-Technical Presentation`: Datascience-CAPSTONE-starskope.pdf
 
     Note: this project is divided into 3 notebooks:
 
