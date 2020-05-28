@@ -3,11 +3,9 @@
 
 **Building a Cyberoptic Artificial Telescope for Astrophysical Object Classification**
 
-> Flatiron School Capstone Project
-* `Author: Ru Keïn`
-* `Date: 4.7.2020`
-* `Instructor: James Irving PhD`
-* `Data Science Full-Time Program`
+
+![GitHub repo size](https://img.shields.io/github/repo-size/hakkeray/starskope)
+![GitHub license](https://img.shields.io/github/license/hakkeray/starskope?color=black)
 
     Note: this project is divided into 3 notebooks:
 
