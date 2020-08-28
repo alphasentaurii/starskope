@@ -7,16 +7,22 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/hakkeray/starskope)
 ![GitHub license](https://img.shields.io/github/license/hakkeray/starskope?color=black)
 
-    Note: this project is divided into 3 notebooks:
 
-    * starskøpe : Binary Classification of K2 Timeseries Photometry Data using a Convolutional Neural Network
-    * starskøpe-2:  Image Classification of Spectrographs using Keras CNN
-    * starskøpe-3: Stacking autoencoded RBMs into single robust Deep Boltzmann Machine
+# Mission Brief
+
+**GOAL**
+The goal of this project is to develop a "cyberoptic artificial telescope" from a machine learning model into an AI-driven application that astrophysicists can use to look at a single or collection of stars and have the model classify them according not only to exoplanet predictions, but also predict what type of star it is, and other key properties that would be of interest for astrophysical science applications.
+
+__Note: this project is divided into 3 notebooks:__
+
+    * starskøpe : Binary Classification of K2 Timeseries Photometry Data using 1D Keras CNN
+    * starskøpe-2: Image Classification of Spectrographs using 2D Keras CNN
+    * starskøpe-3: MAST API via AWS for retraining, testing, validating models with new data
+    * starskøpe-4: Fourier-transforms and `astropy` library to perform triage, vetting
+    * starskøpe-5: Stacking autoencoded RBMs into single robust Deep Boltzmann Machine
 
 ![transiting-planet](https://github.com/hakkeray/starskope/blob/master/288_planetbleed1600.jpeg)
 source: NASA
-
-# Mission Brief
 
 ## ABSTRACT
 
@@ -26,42 +32,55 @@ They say: *'Look, these differential equations--the Maxwell equations--are all t
 
 ---
 
-**INTRODUCTION**
-One of the reasons I quote Mr. Feynman above is because I set out to work on this project with only one year of high school physics under my belt. Despite loving the subject and even getting an A- in that one class, for some reason I did not continue pursuing physics while in school. I bought the Feynman lectures a few years back (on a whim? who does that?) and as soon as I began preparing for this project I felt intuitively that it would be somewhat ridiculous for me to build neural networks for classifying astrophysical data if I didn't fully grasp how and why the equations used to calculate my findings actually work.  
+### QUESTIONS
 
-**QUESTIONS**
-The specific questions this project seeks to answer are as follows: 
+The specific questions this project [starskope](./starskope.ipynb) seeks to answer are as follows: 
 
     1. Can a transiting exoplanet be detected strictly by analyzing the raw flux values of a given star? 
     
     2. What is the best approach for pre-processing photometric timeseries data and what are some of the issues we might encounter in choosing how the data is prepared for classification modeling?
     
-    3. How much signal-to-noise ratio is too much? That is, if the classes are highly imbalanced, for instance only a few planets can be confirmed out of thousands of stars, does the imbalance make for an unreliable or inaccurate model? 
+    3. How much signal-to-noise ratio is too much? That is, if the classes are highly imbalanced (for instance only a few planets can be confirmed out of thousands of stars) does this make for an unreliable or inaccurate model? 
+    
     4. How do we test and validate that?
   
 
-**DATASET**
-To answer the above questions, I started the analysis with a small labeled timeseries dataset from Kaggle posted by NASA several years ago. The reason I chose this particular dataset is because in terms of the type of information we typically need to know in order to solve a physics problem -- the primary one being UNITS, otherwise it's a math problem! -- this one is barren. The author who posted the dataset (`Winter Delta` or `W∆`) does however give us a few hints on how we *could* determine the units, and the dimensions, and a lot of other important physics-related information, if we do a little research. The biggest hint is that this dataset is from the K2 space telescope's Campaign 3 observations in which only 42 confirmed exoplanets are detected in a set of over 5,000 stars. Looking at the dataset on its own (before doing any digging), we are given little information about how long the time period covers, and we know do not know what the time intervals between flux values are. So far, this has not stopped any data scientists from attempting to tackle the classification model without gathering any additional information. 
+### DATASET
 
-**MODEL**
-To answer the question, I first set out to build a model for the data as is, "sans-physics". The baseline model is a neural network using the Keras API in a sci-kit learn wrapper.  
+To answer the above questions, I started the analysis with a labeled timeseries dataset from Kaggle posted by NASA several years ago. In terms of the type of information we typically need to know in order to solve a physics problem -- UNITS (because otherwise it's a math problem! Thanks Mr. Feynman) -- this dataset gives us very little to work with. 
 
-**RESULTS**
-I was able to identify with 99% accuracy the handful of stars (5) in the test dataset that have a confirmed exoplanet in their orbit. 
+### CHALLENGE
 
-**CONCLUSION**
+The author (robot?) who posted the dataset (`Winter Delta` or `W∆`) gives us a few hints on how we *could* determine the units, and the dimensions, and a lot of other important physics-related information, if we do a little research, and "with the help of a seasoned astronomer". I didn't have a seasoned astronomer handy, but I was curious enough to go on a data treasure hunt that lead me to a goldmine -  the Mikulsky Archive for Space Telescopes (MAST). 
+
+### PROBLEM
+
+The Kaggle dataset is from the K2 space telescope's Campaign 3 observations in which only 42 confirmed exoplanets are detected in a set of over 5,000 stars. We are given little information about how long the time period covers, and we know do not know what the time intervals between flux values are. How on earth does one do a timeseries analysis on data without any sense of time intervals? How do we de-noise the signals without knowing what units of power they're in? 
+
+### METHODS
+
+- De-noising: calculate rolling average
+- Scaling: subtract the minima
+- Balancing classes: re-shaping the arrays (similar to image analysis models), then random repeated batch selection so that model sees 50-50 class weights each time.
+
+### MODEL
+
+The baseline model is a neural network using the Keras API in a (modified) sci-kit learn wrapper. 
+
+### RESULTS
+
+I was able to identify with 99% accuracy the handful of stars (5) in the test dataset that have a confirmed exoplanet in their orbit. The model accurately identified all 5 planets in the test set, with only a couple of false positives. 
+
+### CONCLUSION
+
 This baseline model is mathematically accurate, but it does not "understand physics". The conclusion we need to make about the model is whether or not this lack of physics embedded in the training process (or even pre-training process) is acceptable or not.
 
-While it is possible to create a 99% accurate machine learning model for detecting exoplanets using the raw flux values, without any sense of the actual time intervals, and with a highly imbalanced data set (imbalanced meaning only a few positive examples in a sea of negatives) - it is unclear that we can "get away with" this in every case. Furthermore, it is unlikely that could feel completely sure that we aren't missing out on critical information - such as detecting the existence of an earth-like exoplanet transiting a star - if we don't use our understanding of physics to further de-noise, normalize, and scale the data before training the model (and possibly even embed this into a pre-training phase). As a case in point, if you read any of the space telescope handbooks, you will quickly learn just how complex the instruments that are producng this data are, and that the way their technology works, when and where in the sky they were pointing, as well as what actually happened during their missions, you'd know that should all probably be taken into account in your model! The K2 data in particular, for instance, has a unique issue that every so often its thrusters would fire to adjust/maintain its position in the sky, causing data at multiple points to be completely useless. 
+It is unlikely that could feel completely sure that we aren't missing out on critical information - such as detecting the existence of an earth-like exoplanet transiting a star - if we don't use our understanding of physics to further de-noise, normalize, and scale the data before training the model (and possibly even embed this into a pre-training phase). As a case in point, if you read any of the space telescope handbooks, you will quickly learn just how complex the instruments that are producng this data are, and that the way their technology works, when and where in the sky they were pointing, as well as what actually happened during their missions, you'd know that should all probably be taken into account in your model! The K2 data in particular, for instance, has a unique issue that every so often its thrusters would fire to adjust/maintain its position in the sky, causing data at multiple points to be completely useless. 
 
 *Why that matters...*
-This type of noise cannot be removed without knowing what exact times the thrusters fired, as well as what times each of the observations of the dataset occurred. Even if we do manage to throw the bad data out, we are still stuck with the problem of not having any data for that time period, and once again might miss our potential planet's threshold crossing event! If we know where and when those missing pieces occur, we could use that to collect our missing data from another telescope like TESS, which has overlapping targets of observation. A model that can combine data from two different space telescopes, and be smart enough to know based on the telescope it came from how to handle the data, would make truly accurate predictions, and much more useful classifications. 
-
-*What we can do about that...*
-This is the type of model I will set out to build in my future work. This is what we would call a cyberoptic artificial telescope - one that can aggregate large datasets from multiple missions and give us a more accurate, more detailed picture of the stars and planets than what we have available to us in the limited view of a single picture from a single telescope at a single point in time. This is the vision for *STARSKØPE* which will come out of this project.
+This type of noise cannot be removed without knowing what exact times the thrusters fired, as well as what times each of the observations of the dataset occurred. Even if we do manage to throw the bad data out, we are still stuck with the problem of not having any data for that time period, and once again might miss our potential planet's threshold crossing event! If we know where and when those missing pieces occur, we could use that to collect our missing data from another telescope like TESS, which has overlapping targets of observation.  
 
 **RECOMMENDATIONS**
-My recommendations are the following:
 
    1. Use datasets from the MAST website (via API) to incorporate other calculations of the star's properties as features to be used for classification algorithms. Furthermore, attempt other types of transformations and normalizations on the data before running the model - for instance, apply a Fourier transform.
 
@@ -72,9 +91,18 @@ My recommendations are the following:
    4. Explore using autoencoded machine learning algorithms with Restricted Boltzmann Machines - this type of model has proven to be incredibly effective in the image analysis of handwriting as we've seen applied the MNIST dataset - let's find out if the same is true for images of stars, be they the Full Frame Images or spectographs.
 
 **FUTURE WORK**
-To continue this project, I'll take another approach for detecting exoplanets using computer vision to analyze images of spectographs of this same star flux data set. Please go to the notebook `[starskøpe-2]` to see how I use a Restricted Boltzmann Machines neural network model to classify stars as exoplanet hosts using spectograph images of the flux values to find transiting exoplanets. Following this, I will apply the same algorithm to spectographs of Fourier transformed data, as you will see in `[starskøpe-3]`. 
+[starskøpe-2](./starskope-2.ipynb): using computer vision to analyze images of spectrographs of this same star flux data set. 
 
-Additional future work following this project will be to develop my "cyberoptic artificial telescope" as a machine learning driven application that any astrophysicist can use to look at a single or collection of stars and have the model classify them according not only to exoplanet predictions, but also predict what type of star it is, and other key properties that would be of interest for astrophysical science applications.
+[starskøpe-3](./starskope-3.ipynb): using the MAST API to pull additional campaigns (with units!) from AWS to validate, test, and re-train the model.   
+
+`[starskøpe-4]`: spectrograph image analysis of Fourier transformed timeseries data
+
+`[starskøpe-5]` : Restricted Boltzmann Machines neural network model to classify stars as exoplanet hosts using spectograph images of the flux values to find transiting exoplanets.
+
+**NEXT STEPS**
+A model that can combine data from two different space telescopes, and be smart enough to know based on the telescope it came from how to handle the data, would make truly accurate predictions, and much more useful classifications. The vision for building a cyberoptic artificial telescope involves aggregating large datasets from multiple missions to give us a more accurate, more detailed picture of the stars and planets than what we have available to us in the limited view of a single picture from a single telescope at a single point in time. This is the mission for *STARSKØPE* which will be further developed following this initial analysis.
+
+---
 
 
 # Obtain
