@@ -170,6 +170,8 @@ class Flux:
 # --> BoxCox
 # --> Lomb-Scargle
 
+
+    # from kyle pearson
     @staticmethod
     def phase_bin(time,flux,per,tmid=0,cadence=16,offset=0.25):
         '''
