@@ -1,9 +1,19 @@
-import os
+import os, sys
 import zipfile
 import numpy as np
 import spacekit
 from spacekit.transformer import Transformer
 from spacekit.builder import Builder
+
+def main(argv):
+    print(len(argv))
+    if len(argv) < 2:
+        learning_rate=float(1e-5)
+        epochs=int(5)
+    else:
+        learning_rate = float(argv[1])
+        epochs = int(argv[2])
+    return learning_rate, epochs
 
 class Prep:
     def __init__(self):
@@ -44,22 +54,26 @@ class Prep:
         return X_train, X_test
 
 class Launch:
-    def __init__(self, X_train, X_test, y_train, y_test):
+    def __init__(self, X_train, X_test, y_train, y_test, learning_rate, epochs):
         self.X_train = X_train
         self.X_test = X_test
         self.y_train = y_train
         self.y_test = y_test
+        self.learning_rate = learning_rate
+        self.epochs = epochs
         builder = Builder(X_train, X_test, y_train, y_test)
         self.builder = builder
 
     def deploy(self):
         builder = self.builder
-        cnn = builder.build_cnn()
+        learning_rate = self.learning_rate
+        cnn = builder.build_cnn(learning_rate=learning_rate)
         return cnn
 
     def takeoff(self, cnn):
         builder = self.builder
-        history = builder.fit_cnn(cnn)
+        epochs = self.epochs
+        history = builder.fit_cnn(cnn, verbose=2, epochs=epochs, batch_size=32)
 
 if __name__ == '__main__':
     import spacekit
@@ -69,6 +83,8 @@ if __name__ == '__main__':
     X_train, X_test = prep.scale_data(X_train, X_test)
     X_train, X_test = prep.add_filter(X_train, X_test)
 
-    launch = Launch(X_train, X_test,  y_train, y_test)
+    learning_rate, epochs = main(sys.argv)
+
+    launch = Launch(X_train, X_test,  y_train, y_test, learning_rate, epochs)
     cnn = launch.deploy()
     history = launch.takeoff(cnn)
