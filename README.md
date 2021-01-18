@@ -16,6 +16,236 @@
 ![transiting-planet](https://github.com/hakkeray/starskope/blob/master/288_planetbleed1600.jpeg)
 source: NASA
 
+# SPACEKIT Script
+
+There are two ways to run the machine learning model - the slow way is to look through the Jupyter Notebook and see the entire workflow process from data preprocessing and data visualization to modeling and validation. The __fast__ way is to simply run the spacekit script from the command line which will do all the preprocessing, training and validation in the push of a button.
+
+Below are the instructions for installing the `spacekit` PyPi library (virtual env recommended)
+
+## Clone Repository
+```bash
+$ git clone https://github.com/alphasentaurii/starskope.git
+$ cd starskope
+```
+
+# Create Virtual Env & Install `spacekit`
+```bash
+$ virtualenv spacekit-test
+$ source spacekit-test/bin/activate
+(spacekit-env) $ pip install spacekit
+```
+
+# Run script 
+This script will use the spacekit pypi library to preprocess data, train model with training set, test model with test set, then output predictions along with metrics such as accuracy score.
+
+The dataset being used here is from K2’s campaign 3 in which there are only 42 exoplanets, 37 in training set and 5 in the test set. The algorithm uses a Keras CNN to classify timeseries data containing the light flux values of stars and determine which stars have exoplanets in their orbit.
+
+If no arguments are passed in, the model will default to a learning rate of 1e-5 and number of epochs equal to 5. You can adjust these parameters by passing in a learning rate and # epochs as arguments when you run the script.
+
+[default]
+```bash
+(spacekit-env) $ python scripts/spacekit_.py [learning_rate] [epochs]
+
+(spacekit-env) $ python scripts/spacekit_.py
+
+# …is the same as running
+(spacekit-env) $ python scripts/spacekit_.py 1e-5 5
+
+```
+
+OUTPUT - Example output using just 5 epochs (takes <30s running locally on MacBook Pro)
+
+```bash
+
+(spacekit-env) rkein@taftara2020:~/Code/starskope$ python scripts/spacekit_.py
+Data Extraction Successful
+Train-Test Split Successful
+X_train:  (5087, 3197)
+y_train:  (5087, 1)
+X_test:  (570, 3197)
+y_test:  (570, 1)
+Data Scaled to Zero Mean and Unit Variance
+Mean:  0.0
+Variance:  1.0
+Mean:  2.6670356049800446e-17
+Variance:  1.0
+Noise filter added!
+(5087, 3197, 2) (570, 3197, 2)
+BUILDING MODEL...
+2020-11-16 18:24:03.684319: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2020-11-16 18:24:03.698978: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x7fbbe0749c80 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2020-11-16 18:24:03.698996: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+LAYER 1
+LAYER 2
+LAYER 3
+LAYER 4
+FULL CONNECTION
+ADDING COST FUNCTION
+COMPILED
+FITTING MODEL...
+Epoch 1/5
+99/99 - 2s - loss: 0.7461 - accuracy: 0.5013 - val_loss: 0.6826 - val_accuracy: 0.5772
+Epoch 2/5
+99/99 - 2s - loss: 0.7383 - accuracy: 0.5092 - val_loss: 0.6766 - val_accuracy: 0.5772
+Epoch 3/5
+99/99 - 2s - loss: 0.7370 - accuracy: 0.5142 - val_loss: 0.6845 - val_accuracy: 0.5298
+Epoch 4/5
+99/99 - 2s - loss: 0.7277 - accuracy: 0.5218 - val_loss: 0.6820 - val_accuracy: 0.5368
+Epoch 5/5
+99/99 - 2s - loss: 0.7174 - accuracy: 0.5363 - val_loss: 0.6869 - val_accuracy: 0.5263
+TRAINING COMPLETE
+Model: "sequential"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+conv1d (Conv1D)              (None, 3187, 8)           184       
+_________________________________________________________________
+max_pooling1d (MaxPooling1D) (None, 797, 8)            0         
+_________________________________________________________________
+batch_normalization (BatchNo (None, 797, 8)            32        
+_________________________________________________________________
+conv1d_1 (Conv1D)            (None, 787, 16)           1424      
+_________________________________________________________________
+max_pooling1d_1 (MaxPooling1 (None, 197, 16)           0         
+_________________________________________________________________
+batch_normalization_1 (Batch (None, 197, 16)           64        
+_________________________________________________________________
+conv1d_2 (Conv1D)            (None, 187, 32)           5664      
+_________________________________________________________________
+max_pooling1d_2 (MaxPooling1 (None, 47, 32)            0         
+_________________________________________________________________
+batch_normalization_2 (Batch (None, 47, 32)            128       
+_________________________________________________________________
+conv1d_3 (Conv1D)            (None, 37, 64)            22592     
+_________________________________________________________________
+max_pooling1d_3 (MaxPooling1 (None, 9, 64)             0         
+_________________________________________________________________
+flatten (Flatten)            (None, 576)               0         
+_________________________________________________________________
+dropout (Dropout)            (None, 576)               0         
+_________________________________________________________________
+dense (Dense)                (None, 64)                36928     
+_________________________________________________________________
+dropout_1 (Dropout)          (None, 64)                0         
+_________________________________________________________________
+dense_1 (Dense)              (None, 64)                4160      
+_________________________________________________________________
+dense_2 (Dense)              (None, 1)                 65        
+=================================================================
+Total params: 71,241
+Trainable params: 71,129
+Non-trainable params: 112
+_________________________________________________________________
+```
+
+
+# Modify Params to Improve Accuracy
+
+Let’s improve our accuracy score by increasing the learning rate from 1e-5 to 4e-3 and increase epochs from 5 to 10.
+NOTE: This will take ~1min or less to run (longest part is unzipping files which it skips if you’ve already unzipped them from a previous run).
+
+```bash
+(spacekit-env) $ python scripts/spacekit_.py 4e-3 10
+```
+
+Running this locally took about 1 minute and achieved an accuracy score of 99% in the validation set.
+
+OUTPUT:
+```bash
+(spacekit-env) rkein@taftara2020:~/Code/starskope$ python scripts/spacekit_.py 4e-3 10
+Data Extraction Successful
+Train-Test Split Successful
+X_train:  (5087, 3197)
+y_train:  (5087, 1)
+X_test:  (570, 3197)
+y_test:  (570, 1)
+Data Scaled to Zero Mean and Unit Variance
+Mean:  0.0
+Variance:  1.0
+Mean:  2.6670356049800446e-17
+Variance:  1.0
+Noise filter added!
+(5087, 3197, 2) (570, 3197, 2)
+3
+BUILDING MODEL...
+2020-11-16 19:28:05.578642: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2020-11-16 19:28:05.592164: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x7ff657a31f40 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2020-11-16 19:28:05.592184: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+LAYER 1
+LAYER 2
+LAYER 3
+LAYER 4
+FULL CONNECTION
+ADDING COST FUNCTION
+COMPILED
+FITTING MODEL...
+Epoch 1/10
+99/99 - 2s - loss: 0.5648 - accuracy: 0.7109 - val_loss: 0.5995 - val_accuracy: 0.6930
+Epoch 2/10
+99/99 - 2s - loss: 0.2856 - accuracy: 0.8851 - val_loss: 0.2926 - val_accuracy: 0.8702
+Epoch 3/10
+99/99 - 2s - loss: 0.1655 - accuracy: 0.9416 - val_loss: 0.1125 - val_accuracy: 0.9772
+Epoch 4/10
+99/99 - 2s - loss: 0.1102 - accuracy: 0.9599 - val_loss: 0.1643 - val_accuracy: 0.9719
+Epoch 5/10
+99/99 - 2s - loss: 0.0983 - accuracy: 0.9681 - val_loss: 0.1396 - val_accuracy: 0.9667
+Epoch 6/10
+99/99 - 2s - loss: 0.0975 - accuracy: 0.9700 - val_loss: 0.1188 - val_accuracy: 0.9754
+Epoch 7/10
+99/99 - 2s - loss: 0.0536 - accuracy: 0.9823 - val_loss: 0.1321 - val_accuracy: 0.9702
+Epoch 8/10
+99/99 - 2s - loss: 0.0756 - accuracy: 0.9776 - val_loss: 0.0595 - val_accuracy: 0.9877
+Epoch 9/10
+99/99 - 2s - loss: 0.0715 - accuracy: 0.9766 - val_loss: 0.1235 - val_accuracy: 0.9719
+Epoch 10/10
+99/99 - 2s - loss: 0.0454 - accuracy: 0.9864 - val_loss: 0.0392 - val_accuracy: 0.9947
+TRAINING COMPLETE
+Model: "sequential"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+conv1d (Conv1D)              (None, 3187, 8)           184       
+_________________________________________________________________
+max_pooling1d (MaxPooling1D) (None, 797, 8)            0         
+_________________________________________________________________
+batch_normalization (BatchNo (None, 797, 8)            32        
+_________________________________________________________________
+conv1d_1 (Conv1D)            (None, 787, 16)           1424      
+_________________________________________________________________
+max_pooling1d_1 (MaxPooling1 (None, 197, 16)           0         
+_________________________________________________________________
+batch_normalization_1 (Batch (None, 197, 16)           64        
+_________________________________________________________________
+conv1d_2 (Conv1D)            (None, 187, 32)           5664      
+_________________________________________________________________
+max_pooling1d_2 (MaxPooling1 (None, 47, 32)            0         
+_________________________________________________________________
+batch_normalization_2 (Batch (None, 47, 32)            128       
+_________________________________________________________________
+conv1d_3 (Conv1D)            (None, 37, 64)            22592     
+_________________________________________________________________
+max_pooling1d_3 (MaxPooling1 (None, 9, 64)             0         
+_________________________________________________________________
+flatten (Flatten)            (None, 576)               0         
+_________________________________________________________________
+dropout (Dropout)            (None, 576)               0         
+_________________________________________________________________
+dense (Dense)                (None, 64)                36928     
+_________________________________________________________________
+dropout_1 (Dropout)          (None, 64)                0         
+_________________________________________________________________
+dense_1 (Dense)              (None, 64)                4160      
+_________________________________________________________________
+dense_2 (Dense)              (None, 1)                 65        
+=================================================================
+Total params: 71,241
+Trainable params: 71,129
+Non-trainable params: 112
+_________________________________________________________________
+```
+
 # Mission Brief
 
 ## ABSTRACT
@@ -37,6 +267,7 @@ The specific questions this project seeks to answer are as follows:
     2. What is the best approach for pre-processing photometric timeseries data and what are some of the issues we might encounter in choosing how the data is prepared for classification modeling?
     
     3. How much signal-to-noise ratio is too much? That is, if the classes are highly imbalanced, for instance only a few planets can be confirmed out of thousands of stars, does the imbalance make for an unreliable or inaccurate model? 
+
     4. How do we test and validate that?
   
 
@@ -44,7 +275,7 @@ The specific questions this project seeks to answer are as follows:
 To answer the above questions, I started the analysis with a small labeled timeseries dataset from Kaggle posted by NASA several years ago. The reason I chose this particular dataset is because in terms of the type of information we typically need to know in order to solve a physics problem -- the primary one being UNITS, otherwise it's a math problem! -- this one is barren. The author who posted the dataset (`Winter Delta` or `W∆`) does however give us a few hints on how we *could* determine the units, and the dimensions, and a lot of other important physics-related information, if we do a little research. The biggest hint is that this dataset is from the K2 space telescope's Campaign 3 observations in which only 42 confirmed exoplanets are detected in a set of over 5,000 stars. Looking at the dataset on its own (before doing any digging), we are given little information about how long the time period covers, and we know do not know what the time intervals between flux values are. So far, this has not stopped any data scientists from attempting to tackle the classification model without gathering any additional information. 
 
 **MODEL**
-To answer the question, I first set out to build a model for the data as is, "sans-physics". The baseline model is a neural network using the Keras API in a sci-kit learn wrapper.  
+To answer the question, I first set out to build a model for the data as is, "sans-physics". The baseline model is a convolutional neural network (CNN) using the Keras API in a sci-kit learn wrapper.  
 
 **RESULTS**
 I was able to identify with 99% accuracy the handful of stars (5) in the test dataset that have a confirmed exoplanet in their orbit. 
@@ -80,63 +311,6 @@ Additional future work following this project will be to develop my "cyberoptic 
 # Obtain
 
 Begin by importing libraries and code packages for basic analysis, as well as the kaggle dataset.
-
-
-```python
-# fsds_1007219  v0.7.20 loaded.  Read the docs: https://fsds.readthedocs.io/en/latest/ 
-#!pip install fsds_100719
-import fsds_100719
-from fsds_100719.imports import *
-```
-
-    fsds_1007219  v0.7.20 loaded.  Read the docs: https://fsds.readthedocs.io/en/latest/ 
-
-
-<html>
-<style  type="text/css" >
-</style><table id="T_56889908_8d6f_11ea_b585_14109fdfaded" ><caption>Loaded Packages and Handles</caption><thead>    <tr>        <th class="col_heading level0 col0" >Handle</th>        <th class="col_heading level0 col1" >Package</th>        <th class="col_heading level0 col2" >Description</th>    </tr></thead><tbody>
-                <tr>
-                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow0_col0" class="data row0 col0" >dp</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow0_col1" class="data row0 col1" >IPython.display</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow0_col2" class="data row0 col2" >Display modules with helpful display and clearing commands.</td>
-            </tr>
-            <tr>
-                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow1_col0" class="data row1 col0" >fs</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow1_col1" class="data row1 col1" >fsds_100719</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow1_col2" class="data row1 col2" >Custom data science bootcamp student package</td>
-            </tr>
-            <tr>
-                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow2_col0" class="data row2 col0" >mpl</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow2_col1" class="data row2 col1" >matplotlib</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow2_col2" class="data row2 col2" >Matplotlib's base OOP module with formatting artists</td>
-            </tr>
-            <tr>
-                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow3_col0" class="data row3 col0" >plt</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow3_col1" class="data row3 col1" >matplotlib.pyplot</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow3_col2" class="data row3 col2" >Matplotlib's matlab-like plotting module</td>
-            </tr>
-            <tr>
-                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow4_col0" class="data row4 col0" >np</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow4_col1" class="data row4 col1" >numpy</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow4_col2" class="data row4 col2" >scientific computing with Python</td>
-            </tr>
-            <tr>
-                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow5_col0" class="data row5 col0" >pd</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow5_col1" class="data row5 col1" >pandas</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow5_col2" class="data row5 col2" >High performance data structures and tools</td>
-            </tr>
-            <tr>
-                                <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow6_col0" class="data row6 col0" >sns</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow6_col1" class="data row6 col1" >seaborn</td>
-                        <td id="T_56889908_8d6f_11ea_b585_14109fdfadedrow6_col2" class="data row6 col2" >High-level data visualization library based on matplotlib</td>
-            </tr>
-    </tbody></table>
-</html>     
-
-
-    [i] Pandas .iplot() method activated.
-
-
 
 ```python
 # Import code packages and libraries
