@@ -1,0 +1,38 @@
+[default]
+sso_start_url = https://st.awsapps.com/start
+sso_region = us-east-1
+sso_account_id = 218835028644
+sso_role_name = aws-hst-repro-sb-Developer
+region = us-east-1
+output = json
+
+[profile hst-sb]
+region = us-east-1
+output = json
+sso_start_url = https://st.awsapps.com/start
+sso_account_id = 218835028644
+sso_role_name = aws-hst-repro-sb-Developer
+
+[profile hst-dev]
+region = us-east-1
+output = json
+sso_start_url = https://st.awsapps.com/start
+sso_region = us-east-1
+sso_account_id = 502816190863
+sso_role_name = aws-hst-repro-dev-Developer
+
+[profile aws-hst-repro-dev-Developer-502816190863]
+sso_start_url = https://st.awsapps.com/start
+sso_region = us-east-1
+sso_account_id = 502816190863
+sso_role_name = aws-hst-repro-dev-Developer
+region = us-east-1
+output = json
+
+[profile AWSAdministratorAccess-218835028644]
+sso_start_url = https://st.awsapps.com/start
+sso_region = us-east-1
+sso_account_id = 218835028644
+sso_role_name = AWSAdministratorAccess
+region = us-east-1
+output = json
